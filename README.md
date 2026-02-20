@@ -1,4 +1,4 @@
-# neur# careagent/neuron
+# neuron# careagent/neuron
 
 **The organization-level Axon node — free, open-source, for any NPI-holding organization.**
 
