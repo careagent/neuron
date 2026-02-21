@@ -34,12 +34,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Every auditable action appends a hash-chained JSONL entry, and the audit chain integrity verification utility confirms the chain is intact
   4. An NPI with an invalid Luhn check digit is rejected; a valid 10-digit NPI passes validation
   5. All core data model schemas (config, relationships, appointments, billing records, audit events) are exported from `src/types/` and usable for validation
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md — Project scaffold and TypeBox data model schemas
+- [ ] 01-02-PLAN.md — NPI Luhn validation (TDD) and configuration loading pipeline
+- [ ] 01-03-PLAN.md — Storage engine with SQLite and hash-chained audit logging (TDD)
+- [ ] 01-04-PLAN.md — CLI entry point wiring all foundation components
 
 ### Phase 2: Axon Registration
 **Goal**: The Neuron registers itself and its providers with the Axon network directory and maintains reachable status through heartbeats
@@ -172,7 +173,7 @@ Phases execute in numeric order: 1 through 9. Phase 6 depends only on Phase 3 (n
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/3 | Not started | - |
+| 1. Foundation | 0/4 | Planned | - |
 | 2. Axon Registration | 0/2 | Not started | - |
 | 3. Consent and Relationships | 0/3 | Not started | - |
 | 4. WebSocket Routing | 0/2 | Not started | - |
