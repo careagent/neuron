@@ -7,14 +7,14 @@
 
 ### Foundation (FOUN)
 
-- [ ] **FOUN-01**: pnpm TypeScript project scaffold with tsdown build, vitest testing
+- [x] **FOUN-01**: pnpm TypeScript project scaffold with tsdown build, vitest testing
 - [ ] **FOUN-02**: TypeBox schema for `neuron.config.json` with full validation at startup
 - [ ] **FOUN-03**: Configuration loader reads config file, applies NEURON_ environment variable overrides, validates against schema
 - [ ] **FOUN-04**: Invalid configuration prevents startup with clear error messages and non-zero exit
 - [ ] **FOUN-05**: NPI validation utility (10-digit format, Luhn check) for organization and all providers
 - [ ] **FOUN-06**: CLI entry point with stub commands: `neuron init`, `neuron start`, `neuron stop`, `neuron status`
 - [ ] **FOUN-07**: Storage abstraction interface with file-backed JSON or SQLite implementation
-- [ ] **FOUN-08**: All TypeBox schemas for core data models exported from `src/types/`
+- [x] **FOUN-08**: All TypeBox schemas for core data models exported from `src/types/`
 
 ### Audit Logging (AUDT)
 
@@ -153,14 +153,14 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUN-01 | Phase 1 | Pending |
+| FOUN-01 | Phase 1 | Complete |
 | FOUN-02 | Phase 1 | Pending |
 | FOUN-03 | Phase 1 | Pending |
 | FOUN-04 | Phase 1 | Pending |
 | FOUN-05 | Phase 1 | Pending |
 | FOUN-06 | Phase 1 | Pending |
 | FOUN-07 | Phase 1 | Pending |
-| FOUN-08 | Phase 1 | Pending |
+| FOUN-08 | Phase 1 | Complete |
 | AUDT-01 | Phase 1 | Pending |
 | AUDT-02 | Phase 1 | Pending |
 | AUDT-03 | Phase 1 | Pending |
