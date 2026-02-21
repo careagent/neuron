@@ -52,11 +52,13 @@ Plans:
   3. Periodic heartbeat keeps the Neuron's endpoint status `reachable`; stopping heartbeat causes the mock Axon to mark it unreachable
   4. After a restart, previously registered organization and provider state is restored from persistent storage without re-registration
   5. When the Axon registry is unreachable, the Neuron continues operating for established relationships and retries registration with backoff
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — Registration data model (TypeBox schemas, config extension, SQLite migration v2) and mock Axon server
+- [ ] 02-02-PLAN.md — AxonClient HTTP wrapper, RegistrationStateStore, HeartbeatManager, and AxonRegistrationService
+- [ ] 02-03-PLAN.md — IPC layer (Unix domain socket server, client, protocol schemas)
+- [ ] 02-04-PLAN.md — Provider CLI commands and neuron start/status integration wiring
 
 ### Phase 3: Consent and Relationships
 **Goal**: The Neuron verifies cryptographic consent on every connection and manages the full relationship lifecycle from handshake through termination
@@ -174,7 +176,7 @@ Phases execute in numeric order: 1 through 9. Phase 6 depends only on Phase 3 (n
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete | 2026-02-21 |
-| 2. Axon Registration | 0/2 | Not started | - |
+| 2. Axon Registration | 0/4 | Not started | - |
 | 3. Consent and Relationships | 0/3 | Not started | - |
 | 4. WebSocket Routing | 0/2 | Not started | - |
 | 5. Local Discovery | 0/1 | Not started | - |
