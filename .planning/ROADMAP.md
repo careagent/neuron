@@ -12,7 +12,7 @@ The Neuron is built along its dependency chain: foundation infrastructure first 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Config, audit logging, storage, types, CLI stubs, and NPI validation
+- [x] **Phase 1: Foundation** - Config, audit logging, storage, types, CLI stubs, and NPI validation
 - [ ] **Phase 2: Axon Registration** - Organization and provider registration with heartbeat and mock Axon
 - [ ] **Phase 3: Consent and Relationships** - Ed25519 consent verification, relationship store, and termination lifecycle
 - [ ] **Phase 4: WebSocket Routing** - Patient-to-provider session routing with backpressure and concurrency control
@@ -37,10 +37,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 4 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Project scaffold and TypeBox data model schemas
-- [ ] 01-02-PLAN.md — NPI Luhn validation (TDD) and configuration loading pipeline
-- [ ] 01-03-PLAN.md — Storage engine with SQLite and hash-chained audit logging (TDD)
-- [ ] 01-04-PLAN.md — CLI entry point wiring all foundation components
+- [x] 01-01-PLAN.md — Project scaffold and TypeBox data model schemas
+- [x] 01-02-PLAN.md — NPI Luhn validation (TDD) and configuration loading pipeline
+- [x] 01-03-PLAN.md — Storage engine with SQLite and hash-chained audit logging (TDD)
+- [x] 01-04-PLAN.md — CLI entry point wiring all foundation components
 
 ### Phase 2: Axon Registration
 **Goal**: The Neuron registers itself and its providers with the Axon network directory and maintains reachable status through heartbeats
@@ -173,7 +173,7 @@ Phases execute in numeric order: 1 through 9. Phase 6 depends only on Phase 3 (n
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/4 | Planned | - |
+| 1. Foundation | 4/4 | Complete | 2026-02-21 |
 | 2. Axon Registration | 0/2 | Not started | - |
 | 3. Consent and Relationships | 0/3 | Not started | - |
 | 4. WebSocket Routing | 0/2 | Not started | - |
