@@ -71,7 +71,7 @@
 
 ### Scheduling (SCHED)
 
-- [ ] **SCHED-01**: Appointment CRUD with full status lifecycle (scheduled → confirmed → checked_in → in_progress → completed/cancelled/no_show)
+- [ ] **SCHED-01**: Appointment CRUD with full status lifecycle (scheduled -> confirmed -> checked_in -> in_progress -> completed/cancelled/no_show)
 - [ ] **SCHED-02**: Provider availability management (recurring, one-time, blocks)
 - [ ] **SCHED-03**: Time-based and status-based query engine (by date range, provider, status)
 - [ ] **SCHED-04**: All scheduling records reference `relationship_id` only (no patient identity)
@@ -80,7 +80,7 @@
 
 - [ ] **BILL-01**: Billing record CRUD with CPT code entry, modifiers, and units
 - [ ] **BILL-02**: ICD-10 code entry for billing justification
-- [ ] **BILL-03**: Billing status tracking (draft → submitted → accepted/denied/appealed)
+- [ ] **BILL-03**: Billing status tracking (draft -> submitted -> accepted/denied/appealed)
 - [ ] **BILL-04**: All billing records reference `relationship_id` only (no patient identity)
 
 ### Third-Party REST API (TAPI)
@@ -103,10 +103,10 @@
 
 ### Integration & Documentation (INTG)
 
-- [ ] **INTG-01**: E2E test: full lifecycle (init → register → add provider → patient connects → consent → session → terminate)
-- [ ] **INTG-02**: E2E test: local discovery flow (mDNS advertise → discover → connect → consent)
-- [ ] **INTG-03**: E2E test: scheduling/billing through REST API (API key → CRUD → rate limiting)
-- [ ] **INTG-04**: E2E test: chart sync and revocation (authorize → sync → revoke → purge)
+- [ ] **INTG-01**: E2E test: full lifecycle (init -> register -> add provider -> patient connects -> consent -> session -> terminate)
+- [ ] **INTG-02**: E2E test: local discovery flow (mDNS advertise -> discover -> connect -> consent)
+- [ ] **INTG-03**: E2E test: scheduling/billing through REST API (API key -> CRUD -> rate limiting)
+- [ ] **INTG-04**: E2E test: chart sync and revocation (authorize -> sync -> revoke -> purge)
 - [ ] **INTG-05**: REST API documentation (`docs/api.md`) with endpoint reference and request/response examples
 - [ ] **INTG-06**: Architecture guide (`docs/architecture.md`) with data flow diagrams
 - [ ] **INTG-07**: Configuration reference (`docs/configuration.md`) with all options and environment variables
@@ -151,83 +151,81 @@
 
 ## Traceability
 
-Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUN-01 | — | Pending |
-| FOUN-02 | — | Pending |
-| FOUN-03 | — | Pending |
-| FOUN-04 | — | Pending |
-| FOUN-05 | — | Pending |
-| FOUN-06 | — | Pending |
-| FOUN-07 | — | Pending |
-| FOUN-08 | — | Pending |
-| AUDT-01 | — | Pending |
-| AUDT-02 | — | Pending |
-| AUDT-03 | — | Pending |
-| NREG-01 | — | Pending |
-| NREG-02 | — | Pending |
-| NREG-03 | — | Pending |
-| NREG-04 | — | Pending |
-| NREG-05 | — | Pending |
-| NREG-06 | — | Pending |
-| NREG-07 | — | Pending |
-| CSNT-01 | — | Pending |
-| CSNT-02 | — | Pending |
-| CSNT-03 | — | Pending |
-| CSNT-04 | — | Pending |
-| RELN-01 | — | Pending |
-| RELN-02 | — | Pending |
-| RELN-03 | — | Pending |
-| RELN-04 | — | Pending |
-| TERM-01 | — | Pending |
-| TERM-02 | — | Pending |
-| TERM-03 | — | Pending |
-| TERM-04 | — | Pending |
-| ROUT-01 | — | Pending |
-| ROUT-02 | — | Pending |
-| ROUT-03 | — | Pending |
-| ROUT-04 | — | Pending |
-| ROUT-05 | — | Pending |
-| ROUT-06 | — | Pending |
-| DISC-01 | — | Pending |
-| DISC-02 | — | Pending |
-| DISC-03 | — | Pending |
-| DISC-04 | — | Pending |
-| SCHED-01 | — | Pending |
-| SCHED-02 | — | Pending |
-| SCHED-03 | — | Pending |
-| SCHED-04 | — | Pending |
-| BILL-01 | — | Pending |
-| BILL-02 | — | Pending |
-| BILL-03 | — | Pending |
-| BILL-04 | — | Pending |
-| TAPI-01 | — | Pending |
-| TAPI-02 | — | Pending |
-| TAPI-03 | — | Pending |
-| TAPI-04 | — | Pending |
-| TAPI-05 | — | Pending |
-| TAPI-06 | — | Pending |
-| TAPI-07 | — | Pending |
-| SYNC-01 | — | Pending |
-| SYNC-02 | — | Pending |
-| SYNC-03 | — | Pending |
-| SYNC-04 | — | Pending |
-| SYNC-05 | — | Pending |
-| INTG-01 | — | Pending |
-| INTG-02 | — | Pending |
-| INTG-03 | — | Pending |
-| INTG-04 | — | Pending |
-| INTG-05 | — | Pending |
-| INTG-06 | — | Pending |
-| INTG-07 | — | Pending |
+| FOUN-01 | Phase 1 | Pending |
+| FOUN-02 | Phase 1 | Pending |
+| FOUN-03 | Phase 1 | Pending |
+| FOUN-04 | Phase 1 | Pending |
+| FOUN-05 | Phase 1 | Pending |
+| FOUN-06 | Phase 1 | Pending |
+| FOUN-07 | Phase 1 | Pending |
+| FOUN-08 | Phase 1 | Pending |
+| AUDT-01 | Phase 1 | Pending |
+| AUDT-02 | Phase 1 | Pending |
+| AUDT-03 | Phase 1 | Pending |
+| NREG-01 | Phase 2 | Pending |
+| NREG-02 | Phase 2 | Pending |
+| NREG-03 | Phase 2 | Pending |
+| NREG-04 | Phase 2 | Pending |
+| NREG-05 | Phase 2 | Pending |
+| NREG-06 | Phase 2 | Pending |
+| NREG-07 | Phase 2 | Pending |
+| CSNT-01 | Phase 3 | Pending |
+| CSNT-02 | Phase 3 | Pending |
+| CSNT-03 | Phase 3 | Pending |
+| CSNT-04 | Phase 3 | Pending |
+| RELN-01 | Phase 3 | Pending |
+| RELN-02 | Phase 3 | Pending |
+| RELN-03 | Phase 3 | Pending |
+| RELN-04 | Phase 3 | Pending |
+| TERM-01 | Phase 3 | Pending |
+| TERM-02 | Phase 3 | Pending |
+| TERM-03 | Phase 3 | Pending |
+| TERM-04 | Phase 3 | Pending |
+| ROUT-01 | Phase 4 | Pending |
+| ROUT-02 | Phase 4 | Pending |
+| ROUT-03 | Phase 4 | Pending |
+| ROUT-04 | Phase 4 | Pending |
+| ROUT-05 | Phase 4 | Pending |
+| ROUT-06 | Phase 4 | Pending |
+| DISC-01 | Phase 5 | Pending |
+| DISC-02 | Phase 5 | Pending |
+| DISC-03 | Phase 5 | Pending |
+| DISC-04 | Phase 5 | Pending |
+| SCHED-01 | Phase 6 | Pending |
+| SCHED-02 | Phase 6 | Pending |
+| SCHED-03 | Phase 6 | Pending |
+| SCHED-04 | Phase 6 | Pending |
+| BILL-01 | Phase 6 | Pending |
+| BILL-02 | Phase 6 | Pending |
+| BILL-03 | Phase 6 | Pending |
+| BILL-04 | Phase 6 | Pending |
+| TAPI-01 | Phase 7 | Pending |
+| TAPI-02 | Phase 7 | Pending |
+| TAPI-03 | Phase 7 | Pending |
+| TAPI-04 | Phase 7 | Pending |
+| TAPI-05 | Phase 7 | Pending |
+| TAPI-06 | Phase 7 | Pending |
+| TAPI-07 | Phase 7 | Pending |
+| SYNC-01 | Phase 8 | Pending |
+| SYNC-02 | Phase 8 | Pending |
+| SYNC-03 | Phase 8 | Pending |
+| SYNC-04 | Phase 8 | Pending |
+| SYNC-05 | Phase 8 | Pending |
+| INTG-01 | Phase 9 | Pending |
+| INTG-02 | Phase 9 | Pending |
+| INTG-03 | Phase 9 | Pending |
+| INTG-04 | Phase 9 | Pending |
+| INTG-05 | Phase 9 | Pending |
+| INTG-06 | Phase 9 | Pending |
+| INTG-07 | Phase 9 | Pending |
 
 **Coverage:**
-- v1 requirements: 64 total
-- Mapped to phases: 0
-- Unmapped: 64 (pending roadmap creation)
+- v1 requirements: 67 total
+- Mapped to phases: 67
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-21 after initial definition*
+*Last updated: 2026-02-21 after roadmap creation*
