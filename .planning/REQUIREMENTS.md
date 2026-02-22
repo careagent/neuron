@@ -158,12 +158,12 @@
 | FOUN-03 | Phase 1 | Pending |
 | FOUN-04 | Phase 1 | Pending |
 | FOUN-05 | Phase 1 | Pending |
-| FOUN-06 | Phase 1 | Pending |
+| FOUN-06 | Phase 1, Phase 10 | Pending |
 | FOUN-07 | Phase 1 | Pending |
 | FOUN-08 | Phase 1 | Complete |
 | AUDT-01 | Phase 1 | Pending |
-| AUDT-02 | Phase 1 | Pending |
-| AUDT-03 | Phase 1 | Pending |
+| AUDT-02 | Phase 1, Phase 10 | Pending |
+| AUDT-03 | Phase 1, Phase 10 | Pending |
 | NREG-01 | Phase 2 | Complete |
 | NREG-02 | Phase 2 | Complete |
 | NREG-03 | Phase 2 | Complete |

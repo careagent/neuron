@@ -21,6 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 7: REST API** - Third-party HTTP API with auth, rate limiting, CORS, and OpenAPI spec
 - [ ] **Phase 8: Patient Chart Sync** - Incremental chart sync over WebSocket with revocation purge
 - [ ] **Phase 9: Integration and Documentation** - E2E tests across all functionalities and reference documentation
+- [ ] **Phase 10: Foundation Tech Debt** - Wire neuron stop, add missing audit producers, add audit verification CLI command (gap closure)
 
 ## Phase Details
 
@@ -168,10 +169,24 @@ Plans:
 - [ ] 09-02: TBD
 - [ ] 09-03: TBD
 
+### Phase 10: Foundation Tech Debt
+**Goal**: Close tech debt gaps from v1.0 audit — wire `neuron stop` to IPC, add missing audit event producers, and expose audit chain verification via CLI
+**Depends on**: Phase 2 (IPC layer required for stop signal)
+**Requirements**: FOUN-06, AUDT-02, AUDT-03
+**Gap Closure:** Closes gaps from v1.0 milestone audit
+**Success Criteria** (what must be TRUE):
+  1. `neuron stop` sends a shutdown signal via IPC to a running Neuron process and it exits cleanly
+  2. Audit events are emitted for all 7 categories defined in the schema (registration, connection, consent, api_access, sync, admin, termination) — the 3 missing categories (connection, api_access, sync) have producers wired at their natural trigger points
+  3. `neuron verify-audit` CLI command runs `verifyAuditChain()` and reports chain integrity status
+**Plans**: TBD
+
+Plans:
+- [ ] 10-01: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 through 9. Phase 6 depends only on Phase 3 (not 4 or 5), but is sequenced here after Phase 5 for a clean build order.
+Phases execute in numeric order: 1 through 10. Phase 6 depends only on Phase 3 (not 4 or 5), but is sequenced here after Phase 5 for a clean build order. Phase 10 (gap closure) depends on Phase 2 (IPC layer) and can be executed any time after Phase 2 completes.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -184,3 +199,4 @@ Phases execute in numeric order: 1 through 9. Phase 6 depends only on Phase 3 (n
 | 7. REST API | 0/2 | Not started | - |
 | 8. Patient Chart Sync | 0/1 | Not started | - |
 | 9. Integration and Documentation | 0/3 | Not started | - |
+| 10. Foundation Tech Debt | 0/1 | Not started | - |
