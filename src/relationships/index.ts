@@ -5,3 +5,4 @@ export {
   type HandshakeChallenge,
   type ChallengeResponse,
 } from './handshake.js'
+export { TerminationHandler } from './termination.js'
