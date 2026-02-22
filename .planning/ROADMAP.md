@@ -119,11 +119,12 @@ Plans:
   3. CORS preflight requests from allowed origins succeed; requests from disallowed origins are rejected
   4. `GET /openapi.json` returns a valid OpenAPI 3.1 specification describing all endpoints
   5. API keys can be created, revoked, and listed via CLI commands (`neuron api-key create/revoke/list`)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md — API key data model, store, rate limiter, config extension, and HTTP utilities (TDD)
+- [ ] 06-02-PLAN.md — REST API router with auth, CORS, rate limiting, route handlers, and OpenAPI 3.1 spec
+- [ ] 06-03-PLAN.md — API key CLI commands and start command REST wiring
 
 ### Phase 7: Patient Chart Sync
 **Goal**: Patient CareAgents can push incremental chart updates to the Neuron over established sessions, and access revocation purges all cached data
@@ -182,7 +183,7 @@ Phases execute in numeric order: 1 through 9. Phase 9 (gap closure) depends on P
 | 3. Consent and Relationships | 3/3 | Complete | 2026-02-22 |
 | 4. WebSocket Routing | 4/4 | Complete | 2026-02-22 |
 | 5. Local Discovery | 2/2 | Complete | 2026-02-22 |
-| 6. REST API | 0/2 | Not started | - |
+| 6. REST API | 0/3 | Not started | - |
 | 7. Patient Chart Sync | 0/1 | Not started | - |
 | 8. Integration and Documentation | 0/3 | Not started | - |
 | 9. Foundation Tech Debt | 0/1 | Not started | - |
