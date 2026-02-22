@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 5 of 9 (Local Discovery)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-02-22 -- Phase 4 complete, transitioning to Phase 5
+Plan: 1 of 2 complete
+Status: Executing
+Last activity: 2026-02-22 -- Plan 05-01 complete, ready for Plan 05-02
 
-Progress: [████████████████████] 15/15 plans (100% of planned so far)
+Progress: [████████████████████░] 16/17 plans (94% of planned so far)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 2.6min
-- Total execution time: 0.48 hours
+- Total plans completed: 12
+- Average duration: 2.8min
+- Total execution time: 0.55 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [████████████████████] 15/15 p
 | 02-axon-registration | 4 | 12min | 3min |
 | 03-consent-and-relationships | 3 | 7min | 2.3min |
 | 04-websocket-routing | 4 | 10min | 2.5min |
+| 05-local-discovery | 1 | 5min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (2min), 04-01 (2min), 04-02 (3min), 04-03 (3min), 04-04 (2min)
+- Last 5 plans: 04-01 (2min), 04-02 (3min), 04-03 (3min), 04-04 (2min), 05-01 (5min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -88,6 +89,10 @@ Recent decisions affecting current work:
 - [04-03]: Integration tests use ephemeral port (0) and real WebSocket connections for end-to-end verification
 - [04-04]: provider_npi set to 'unknown' in early consent failure audit because NPI extraction has not yet succeeded
 - [04-04]: Audit-before-close pattern applied consistently to all failure paths in handler.ts
+- [05-01]: vi.hoisted() required for mock constructor pattern -- vi.mock hoists above const declarations
+- [05-01]: DiscoveryConfig is plain interface, assembled at call site from NeuronConfig fields
+- [05-01]: Service instance name neuron-{NPI} for multi-Neuron LAN uniqueness
+- [05-01]: TXT record keys npi/ver/ep all <=9 chars per RFC 6763 Section 6.4
 
 ### Pending Todos
 
@@ -102,5 +107,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-local-discovery/05-CONTEXT.md
+Stopped at: Completed 05-01-PLAN.md
+Resume file: None
