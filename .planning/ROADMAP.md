@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Axon Registration** - Organization and provider registration with heartbeat and mock Axon
 - [x] **Phase 3: Consent and Relationships** - Ed25519 consent verification, relationship store, and termination lifecycle (completed 2026-02-22)
 - [ ] **Phase 4: WebSocket Routing** - Patient-to-provider session routing with backpressure and concurrency control
-- [ ] **Phase 5: Local Discovery** - mDNS/DNS-SD advertisement for local network CareAgent connections
+- [x] **Phase 5: Local Discovery** - mDNS/DNS-SD advertisement for local network CareAgent connections (completed 2026-02-22)
 - [ ] **Phase 6: Scheduling and Billing** - Operational data CRUD referenced by relationship_id only
 - [ ] **Phase 7: REST API** - Third-party HTTP API with auth, rate limiting, CORS, and OpenAPI spec
 - [ ] **Phase 8: Patient Chart Sync** - Incremental chart sync over WebSocket with revocation purge
@@ -107,8 +107,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Discovery service core (config extension, DiscoveryService class, TDD tests)
-- [ ] 05-02-PLAN.md — Lifecycle integration and CLI (start/stop wiring, neuron discover command, CLI tests)
+- [x] 05-01-PLAN.md — Discovery service core (config extension, DiscoveryService class, TDD tests)
+- [x] 05-02-PLAN.md — Lifecycle integration and CLI (start/stop wiring, neuron discover command, CLI tests)
 
 ### Phase 6: Scheduling and Billing
 **Goal**: The Neuron stores operational scheduling and billing data referenced exclusively by relationship_id, with no patient identity present
@@ -197,7 +197,7 @@ Phases execute in numeric order: 1 through 10. Phase 6 depends only on Phase 3 (
 | 2. Axon Registration | 1/4 | In progress | - |
 | 3. Consent and Relationships | 0/3 | Complete    | 2026-02-22 |
 | 4. WebSocket Routing | 0/3 | Not started | - |
-| 5. Local Discovery | 0/2 | Not started | - |
+| 5. Local Discovery | 2/2 | Complete | 2026-02-22 |
 | 6. Scheduling and Billing | 0/2 | Not started | - |
 | 7. REST API | 0/2 | Not started | - |
 | 8. Patient Chart Sync | 0/1 | Not started | - |

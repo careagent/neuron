@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 5 of 9 (Local Discovery)
-Plan: 1 of 2 complete
-Status: Executing
-Last activity: 2026-02-22 -- Plan 05-01 complete, ready for Plan 05-02
+Plan: 2 of 2 complete
+Status: Phase complete
+Last activity: 2026-02-22 -- Phase 5 complete, ready for transition
 
-Progress: [████████████████████░] 16/17 plans (94% of planned so far)
+Progress: [█████████████████████] 17/17 plans (100% of planned so far)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: 2.8min
-- Total execution time: 0.55 hours
+- Total execution time: 0.58 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [████████████████████░] 16/1
 | 02-axon-registration | 4 | 12min | 3min |
 | 03-consent-and-relationships | 3 | 7min | 2.3min |
 | 04-websocket-routing | 4 | 10min | 2.5min |
-| 05-local-discovery | 1 | 5min | 5min |
+| 05-local-discovery | 2 | 8min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (2min), 04-02 (3min), 04-03 (3min), 04-04 (2min), 05-01 (5min)
+- Last 5 plans: 04-02 (3min), 04-03 (3min), 04-04 (2min), 05-01 (5min), 05-02 (3min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -93,6 +93,10 @@ Recent decisions affecting current work:
 - [05-01]: DiscoveryConfig is plain interface, assembled at call site from NeuronConfig fields
 - [05-01]: Service instance name neuron-{NPI} for multi-Neuron LAN uniqueness
 - [05-01]: TXT record keys npi/ver/ep all <=9 chars per RFC 6763 Section 6.4
+- [05-02]: Discovery stops first in shutdown pipeline -- goodbye packets before WebSocket close
+- [05-02]: getLocalAddress() resolves first non-internal IPv4 when server binds to 0.0.0.0
+- [05-02]: neuron discover is one-shot mode with configurable timeout (default 3s)
+- [05-02]: DISC-04 satisfied by design -- local connections use same WebSocket endpoint and consent handler
 
 ### Pending Todos
 
@@ -107,5 +111,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 05-01-PLAN.md
+Stopped at: Completed 05-02-PLAN.md (Phase 5 complete)
 Resume file: None

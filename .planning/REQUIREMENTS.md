@@ -67,7 +67,7 @@
 - [x] **DISC-01**: mDNS/DNS-SD advertisement with service type `_careagent-neuron._tcp`
 - [x] **DISC-02**: TXT record with organization NPI, protocol version, and connection endpoint
 - [x] **DISC-03**: Auto-start/stop with Neuron lifecycle (configurable via `localNetwork.enabled`)
-- [ ] **DISC-04**: Same consent verification flow as remote connections (no security shortcuts for local)
+- [x] **DISC-04**: Same consent verification flow as remote connections (no security shortcuts for local)
 
 ### Scheduling (SCHED)
 
@@ -192,7 +192,7 @@
 | DISC-01 | Phase 5 | Complete |
 | DISC-02 | Phase 5 | Complete |
 | DISC-03 | Phase 5 | Complete |
-| DISC-04 | Phase 5 | Pending |
+| DISC-04 | Phase 5 | Complete |
 | SCHED-01 | Phase 6 | Pending |
 | SCHED-02 | Phase 6 | Pending |
 | SCHED-03 | Phase 6 | Pending |
