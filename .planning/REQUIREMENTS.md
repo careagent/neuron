@@ -69,19 +69,6 @@
 - [x] **DISC-03**: Auto-start/stop with Neuron lifecycle (configurable via `localNetwork.enabled`)
 - [x] **DISC-04**: Same consent verification flow as remote connections (no security shortcuts for local)
 
-### Scheduling (SCHED)
-
-- [ ] **SCHED-01**: Appointment CRUD with full status lifecycle (scheduled -> confirmed -> checked_in -> in_progress -> completed/cancelled/no_show)
-- [ ] **SCHED-02**: Provider availability management (recurring, one-time, blocks)
-- [ ] **SCHED-03**: Time-based and status-based query engine (by date range, provider, status)
-- [ ] **SCHED-04**: All scheduling records reference `relationship_id` only (no patient identity)
-
-### Billing (BILL)
-
-- [ ] **BILL-01**: Billing record CRUD with CPT code entry, modifiers, and units
-- [ ] **BILL-02**: ICD-10 code entry for billing justification
-- [ ] **BILL-03**: Billing status tracking (draft -> submitted -> accepted/denied/appealed)
-- [ ] **BILL-04**: All billing records reference `relationship_id` only (no patient identity)
 
 ### Third-Party REST API (TAPI)
 
@@ -89,7 +76,7 @@
 - [ ] **TAPI-02**: API key authentication for all endpoints (generated/revoked via CLI)
 - [ ] **TAPI-03**: Rate limiting per API key with configurable limits and 429 responses
 - [ ] **TAPI-04**: CORS handling with configurable allowed origins
-- [ ] **TAPI-05**: All routes implemented: organization, scheduling, billing, relationships (read-only), status
+- [ ] **TAPI-05**: All routes implemented: organization, relationships (read-only), status
 - [ ] **TAPI-06**: OpenAPI 3.1 specification generated from route definitions, served at `GET /openapi.json`
 - [ ] **TAPI-07**: API key management via CLI (`neuron api-key create/revoke/list`)
 
@@ -105,7 +92,7 @@
 
 - [ ] **INTG-01**: E2E test: full lifecycle (init -> register -> add provider -> patient connects -> consent -> session -> terminate)
 - [ ] **INTG-02**: E2E test: local discovery flow (mDNS advertise -> discover -> connect -> consent)
-- [ ] **INTG-03**: E2E test: scheduling/billing through REST API (API key -> CRUD -> rate limiting)
+- [ ] **INTG-03**: E2E test: REST API key creation, organization/relationship endpoints, rate limiting
 - [ ] **INTG-04**: E2E test: chart sync and revocation (authorize -> sync -> revoke -> purge)
 - [ ] **INTG-05**: REST API documentation (`docs/api.md`) with endpoint reference and request/response examples
 - [ ] **INTG-06**: Architecture guide (`docs/architecture.md`) with data flow diagrams
@@ -130,10 +117,21 @@
 - **SCALE-01**: Multi-site clustering
 - **SCALE-02**: Load balancing and horizontal scaling
 
-### Integrations
+### Scheduling & Billing (deferred from v1)
 
+- **SCHED-01**: Appointment CRUD with full status lifecycle
+- **SCHED-02**: Provider availability management (recurring, one-time, blocks)
+- **SCHED-03**: Time-based and status-based query engine
+- **SCHED-04**: All scheduling records reference `relationship_id` only
+- **BILL-01**: Billing record CRUD with CPT code entry, modifiers, and units
+- **BILL-02**: ICD-10 code entry for billing justification
+- **BILL-03**: Billing status tracking
+- **BILL-04**: All billing records reference `relationship_id` only
 - **BILL-05**: Claims submission to payers
 - **SCHED-05**: External calendar integration (Google Calendar, Outlook)
+
+### Integrations
+
 - **SDK-01**: Full `@careagent/neuron-sdk` TypeScript client package
 
 ## Out of Scope
@@ -148,6 +146,7 @@
 | Patient identity storage | Opaque relationship_id only; patient names/identity live with patient CareAgent |
 | Real-time clinical messaging | Neuron routes sessions, not clinical messages; content flows peer-to-peer |
 | Credential issuance | Neuron verifies credentials, does not issue them |
+| Scheduling/billing data storage | Removed from v1 — Neuron is routing/consent infrastructure, not an operational data store |
 
 ## Traceability
 
@@ -193,37 +192,29 @@
 | DISC-02 | Phase 5 | Complete |
 | DISC-03 | Phase 5 | Complete |
 | DISC-04 | Phase 5 | Complete |
-| SCHED-01 | Phase 6 | Pending |
-| SCHED-02 | Phase 6 | Pending |
-| SCHED-03 | Phase 6 | Pending |
-| SCHED-04 | Phase 6 | Pending |
-| BILL-01 | Phase 6 | Pending |
-| BILL-02 | Phase 6 | Pending |
-| BILL-03 | Phase 6 | Pending |
-| BILL-04 | Phase 6 | Pending |
-| TAPI-01 | Phase 7 | Pending |
-| TAPI-02 | Phase 7 | Pending |
-| TAPI-03 | Phase 7 | Pending |
-| TAPI-04 | Phase 7 | Pending |
-| TAPI-05 | Phase 7 | Pending |
-| TAPI-06 | Phase 7 | Pending |
-| TAPI-07 | Phase 7 | Pending |
-| SYNC-01 | Phase 8 | Pending |
-| SYNC-02 | Phase 8 | Pending |
-| SYNC-03 | Phase 8 | Pending |
-| SYNC-04 | Phase 8 | Pending |
-| SYNC-05 | Phase 8 | Pending |
-| INTG-01 | Phase 9 | Pending |
-| INTG-02 | Phase 9 | Pending |
-| INTG-03 | Phase 9 | Pending |
-| INTG-04 | Phase 9 | Pending |
-| INTG-05 | Phase 9 | Pending |
-| INTG-06 | Phase 9 | Pending |
-| INTG-07 | Phase 9 | Pending |
+| TAPI-01 | Phase 6 | Pending |
+| TAPI-02 | Phase 6 | Pending |
+| TAPI-03 | Phase 6 | Pending |
+| TAPI-04 | Phase 6 | Pending |
+| TAPI-05 | Phase 6 | Pending |
+| TAPI-06 | Phase 6 | Pending |
+| TAPI-07 | Phase 6 | Pending |
+| SYNC-01 | Phase 7 | Pending |
+| SYNC-02 | Phase 7 | Pending |
+| SYNC-03 | Phase 7 | Pending |
+| SYNC-04 | Phase 7 | Pending |
+| SYNC-05 | Phase 7 | Pending |
+| INTG-01 | Phase 8 | Pending |
+| INTG-02 | Phase 8 | Pending |
+| INTG-03 | Phase 8 | Pending |
+| INTG-04 | Phase 8 | Pending |
+| INTG-05 | Phase 8 | Pending |
+| INTG-06 | Phase 8 | Pending |
+| INTG-07 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 67 total
-- Mapped to phases: 67
+- v1 requirements: 59 total
+- Mapped to phases: 58
 - Unmapped: 0
 
 ---

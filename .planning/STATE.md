@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Every NPI-holding organization can connect to the CareAgent network through a free, secure organizational boundary that routes patient connections, verifies consent, and never holds clinical data.
-**Current focus:** Phase 6: Scheduling and Billing
+**Current focus:** Phase 6: REST API
 
 ## Current Position
 
-Phase: 6 of 9 (Scheduling and Billing)
+Phase: 6 of 9 (REST API)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-02-22 -- Phase 5 complete, transitioning to Phase 6
+Last activity: 2026-02-22 -- Phase 5 complete, removed Scheduling/Billing from v1, transitioning to Phase 6 (REST API)
 
 Progress: [█████████████████████] 17/17 plans (100% of planned so far)
 
@@ -111,5 +111,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Phase 5 complete, ready to plan Phase 6 (Scheduling and Billing)
+Stopped at: Phase 5 complete, ready to plan Phase 6 (REST API)
 Resume file: None

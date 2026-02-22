@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A standalone Node.js server that serves as the organization-level endpoint for NPI-holding healthcare organizations in the CareAgent ecosystem. The Neuron is the "organizational membrane" between the national Axon network and individual provider CareAgents — it routes patient connections, verifies consent, manages scheduling/billing data, and exposes a REST API for third-party integrations. Free, open-source infrastructure (Apache 2.0) for any organization that participates in patient care.
+A standalone Node.js server that serves as the organization-level endpoint for NPI-holding healthcare organizations in the CareAgent ecosystem. The Neuron is the "organizational membrane" between the national Axon network and individual provider CareAgents — it routes patient connections, verifies consent, and exposes a REST API for third-party integrations. Free, open-source infrastructure (Apache 2.0) for any organization that participates in patient care.
 
 ## Core Value
 
@@ -37,13 +37,9 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - [ ] Provider-initiated termination with state protocol compliance
 - [ ] Terminated relationships permanently stop routing
 - [ ] Bidirectional session bridge between patient and provider
-- [ ] Appointment CRUD with full status lifecycle
-- [ ] Provider availability management (recurring, one-time, blocks)
-- [ ] Billing record CRUD with CPT/ICD codes
-- [ ] All scheduling/billing records reference relationship_id only (no patient identity)
 - [ ] HTTP REST API on Node.js built-in http module
 - [ ] API key authentication with rate limiting
-- [ ] Organization, scheduling, billing, relationship, status routes
+- [ ] Organization, relationship, status routes
 - [ ] OpenAPI 3.1 specification
 - [ ] Patient Chart sync receiver with authorization check
 - [ ] Incremental sync with last-sync-timestamp tracking
@@ -66,6 +62,7 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - Data encryption at rest (v1) — filesystem-level encryption recommended
 - Mutual TLS (v1) — bearer tokens sufficient for demo
 - OAuth 2.0 for API auth (v1) — API keys sufficient
+- Scheduling/billing data storage (v1) — Neuron is routing/consent infrastructure, not an operational data store; deferred to v2
 - Claims submission to payers — requires external integration
 - External calendar integration — requires OAuth flows
 - Full Neuron SDK package — built after API stabilizes
@@ -106,7 +103,7 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Standalone server, not plugin | Neuron owns its own process lifecycle; zero-dep constraint applies to plugins, not servers | — Pending |
-| relationship_id only for scheduling/billing | Keeps Neuron outside HIPAA covered entity classification | — Pending |
+| Scheduling/billing removed from v1 | Neuron should stay focused on routing/consent/discovery; operational data is a separate concern | Phase 5 transition |
 | Node.js built-in http (no framework) | Consistency with ecosystem; minimal deps | — Pending |
 | Hash-chained JSONL audit log | Tamper-evident operational audit trail | — Pending |
 | ws in noServer mode for WebSocket | Shares HTTP server with Phase 7 REST API; one port for all traffic | Phase 4 |
