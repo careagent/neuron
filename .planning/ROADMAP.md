@@ -104,10 +104,11 @@ Plans:
   1. When the Neuron starts with `localNetwork.enabled: true`, it advertises `_careagent-neuron._tcp` via mDNS with TXT records containing the organization NPI and connection endpoint
   2. When the Neuron shuts down, the mDNS advertisement is gracefully removed from the network
   3. A local connection goes through the same consent verification and relationship check as a remote connection (no security shortcuts)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md — Discovery service core (config extension, DiscoveryService class, TDD tests)
+- [ ] 05-02-PLAN.md — Lifecycle integration and CLI (start/stop wiring, neuron discover command, CLI tests)
 
 ### Phase 6: Scheduling and Billing
 **Goal**: The Neuron stores operational scheduling and billing data referenced exclusively by relationship_id, with no patient identity present
@@ -196,7 +197,7 @@ Phases execute in numeric order: 1 through 10. Phase 6 depends only on Phase 3 (
 | 2. Axon Registration | 1/4 | In progress | - |
 | 3. Consent and Relationships | 0/3 | Complete    | 2026-02-22 |
 | 4. WebSocket Routing | 0/3 | Not started | - |
-| 5. Local Discovery | 0/1 | Not started | - |
+| 5. Local Discovery | 0/2 | Not started | - |
 | 6. Scheduling and Billing | 0/2 | Not started | - |
 | 7. REST API | 0/2 | Not started | - |
 | 8. Patient Chart Sync | 0/1 | Not started | - |
