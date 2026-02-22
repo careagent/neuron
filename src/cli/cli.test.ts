@@ -8,6 +8,7 @@ import { registerStartCommand } from './commands/start.js'
 import { registerStopCommand } from './commands/stop.js'
 import { registerStatusCommand } from './commands/status.js'
 import { registerProviderCommand } from './commands/provider.js'
+import { registerDiscoverCommand } from './commands/discover.js'
 
 // Mock IPC and registration modules for Phase 2 tests
 vi.mock('../ipc/index.js', () => ({
@@ -44,6 +45,13 @@ vi.mock('../routing/index.js', () => {
     createConnectionHandler: vi.fn().mockReturnValue(vi.fn()),
   }
 })
+
+vi.mock('../discovery/index.js', () => ({
+  DiscoveryService: vi.fn().mockImplementation(() => ({
+    start: vi.fn().mockResolvedValue(undefined),
+    stop: vi.fn().mockResolvedValue(undefined),
+  })),
+}))
 
 vi.mock('../registration/index.js', () => {
   const MockAxonRegistrationService = vi.fn(function (this: Record<string, unknown>) {
@@ -92,6 +100,7 @@ describe('CLI', () => {
     registerStopCommand(program)
     registerStatusCommand(program)
     registerProviderCommand(program)
+    registerDiscoverCommand(program)
     return program
   }
 
@@ -129,7 +138,7 @@ describe('CLI', () => {
   }
 
   describe('help output', () => {
-    it('should list all commands in help including provider', () => {
+    it('should list all commands in help including provider and discover', () => {
       const program = createProgram()
       const help = program.helpInformation()
       expect(help).toContain('init')
@@ -137,6 +146,7 @@ describe('CLI', () => {
       expect(help).toContain('stop')
       expect(help).toContain('status')
       expect(help).toContain('provider')
+      expect(help).toContain('discover')
     })
   })
 
@@ -328,6 +338,22 @@ describe('CLI', () => {
       })
 
       expect(existsSync(dbPath)).toBe(true)
+    })
+
+    it('should log discovery disabled when localNetwork.enabled is false', async () => {
+      const { configPath } = writeValidConfig(tempDir)
+
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+      vi.spyOn(global, 'setInterval').mockReturnValue(0 as unknown as ReturnType<typeof setInterval>)
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'start', '--config', configPath])
+
+      await vi.waitFor(() => {
+        const calls = stdoutSpy.mock.calls.map((c) => c[0])
+        expect(calls.some((c) => typeof c === 'string' && c.includes('Local network discovery disabled'))).toBe(true)
+      })
     })
   })
 
