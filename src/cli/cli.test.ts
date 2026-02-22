@@ -10,6 +10,7 @@ import { registerStatusCommand } from './commands/status.js'
 import { registerProviderCommand } from './commands/provider.js'
 import { registerDiscoverCommand } from './commands/discover.js'
 import { registerApiKeyCommand } from './commands/api-key.js'
+import { registerVerifyAuditCommand } from './commands/verify-audit.js'
 
 // Mock IPC and registration modules for Phase 2 tests
 vi.mock('../ipc/index.js', () => ({
@@ -98,6 +99,14 @@ vi.mock('../registration/index.js', () => {
   return { AxonRegistrationService: MockAxonRegistrationService }
 })
 
+vi.mock('../audit/index.js', () => ({
+  AuditLogger: vi.fn(function (this: Record<string, unknown>) {
+    this.append = vi.fn()
+  }),
+  verifyAuditChain: vi.fn(),
+  canonicalize: vi.fn(),
+}))
+
 describe('CLI', () => {
   let tempDir: string
 
@@ -125,6 +134,7 @@ describe('CLI', () => {
     registerProviderCommand(program)
     registerDiscoverCommand(program)
     registerApiKeyCommand(program)
+    registerVerifyAuditCommand(program)
     return program
   }
 
@@ -176,6 +186,7 @@ describe('CLI', () => {
       expect(help).toContain('provider')
       expect(help).toContain('discover')
       expect(help).toContain('api-key')
+      expect(help).toContain('verify-audit')
     })
   })
 
@@ -238,13 +249,17 @@ describe('CLI', () => {
       // Verify storage DB was created
       expect(existsSync(dbPath)).toBe(true)
 
-      // Verify audit log was created with startup entry
-      expect(existsSync(auditPath)).toBe(true)
-      const auditContent = readFileSync(auditPath, 'utf-8').trim()
-      const entry = JSON.parse(auditContent)
-      expect(entry.category).toBe('admin')
-      expect(entry.action).toBe('neuron_start')
-      expect(entry.details.npi).toBe('1234567893')
+      // Verify AuditLogger was constructed and append was called with startup entry
+      const { AuditLogger } = await import('../audit/index.js')
+      expect(AuditLogger).toHaveBeenCalledWith(auditPath)
+      const mockInstance = vi.mocked(AuditLogger).mock.instances[0] as unknown as { append: ReturnType<typeof vi.fn> }
+      expect(mockInstance.append).toHaveBeenCalledWith(
+        expect.objectContaining({
+          category: 'admin',
+          action: 'neuron_start',
+          details: expect.objectContaining({ npi: '1234567893' }),
+        }),
+      )
     })
 
     it('should start IPC server during startup', async () => {
@@ -720,6 +735,106 @@ describe('CLI', () => {
       expect(allOutput).toContain('key-xyz')
       expect(allOutput).toContain('staging')
       expect(allOutput).toContain('REVOKED')
+    })
+  })
+
+  describe('verify-audit command', () => {
+    it('should report valid chain with --path', async () => {
+      const { verifyAuditChain } = await import('../audit/index.js')
+      vi.mocked(verifyAuditChain).mockReturnValue({
+        valid: true,
+        entries: 5,
+        errors: [],
+      })
+
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'verify-audit', '--path', join(tempDir, 'audit.jsonl')])
+
+      await vi.waitFor(() => {
+        expect(verifyAuditChain).toHaveBeenCalledWith(join(tempDir, 'audit.jsonl'))
+      })
+
+      const calls = stdoutSpy.mock.calls.map((c) => c[0])
+      expect(calls.some((c) => typeof c === 'string' && c.includes('Audit chain verified'))).toBe(true)
+      expect(calls.some((c) => typeof c === 'string' && c.includes('5 entries'))).toBe(true)
+    })
+
+    it('should report empty audit log', async () => {
+      const { verifyAuditChain } = await import('../audit/index.js')
+      vi.mocked(verifyAuditChain).mockReturnValue({
+        valid: true,
+        entries: 0,
+        errors: [],
+      })
+
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'verify-audit', '--path', join(tempDir, 'audit.jsonl')])
+
+      await vi.waitFor(() => {
+        expect(verifyAuditChain).toHaveBeenCalled()
+      })
+
+      const calls = stdoutSpy.mock.calls.map((c) => c[0])
+      expect(calls.some((c) => typeof c === 'string' && c.includes('Audit log is empty'))).toBe(true)
+    })
+
+    it('should report broken chain and exit 1', async () => {
+      const { verifyAuditChain } = await import('../audit/index.js')
+      vi.mocked(verifyAuditChain).mockReturnValue({
+        valid: false,
+        entries: 3,
+        errors: [
+          { line: 2, error: 'Hash mismatch on line 2' },
+        ],
+      })
+
+      const stderrSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'verify-audit', '--path', join(tempDir, 'audit.jsonl')])
+
+      await vi.waitFor(() => {
+        expect(exitSpy).toHaveBeenCalledWith(1)
+      })
+
+      const stderrCalls = stderrSpy.mock.calls.map((c) => c[0])
+      expect(stderrCalls.some((c) => typeof c === 'string' && c.includes('Audit chain BROKEN'))).toBe(true)
+      expect(stderrCalls.some((c) => typeof c === 'string' && c.includes('Line 2'))).toBe(true)
+
+      const stdoutCalls = stdoutSpy.mock.calls.map((c) => c[0])
+      expect(stdoutCalls.some((c) => typeof c === 'string' && c.includes('3 entries checked'))).toBe(true)
+    })
+
+    it('should resolve path from config when --path not provided', async () => {
+      const { configPath, auditPath } = writeValidConfig(tempDir)
+
+      const { verifyAuditChain } = await import('../audit/index.js')
+      vi.mocked(verifyAuditChain).mockReturnValue({
+        valid: true,
+        entries: 2,
+        errors: [],
+      })
+
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'verify-audit', '--config', configPath])
+
+      await vi.waitFor(() => {
+        expect(verifyAuditChain).toHaveBeenCalledWith(auditPath)
+      })
+
+      const calls = stdoutSpy.mock.calls.map((c) => c[0])
+      expect(calls.some((c) => typeof c === 'string' && c.includes('Audit chain verified'))).toBe(true)
     })
   })
 })

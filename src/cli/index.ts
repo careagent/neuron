@@ -6,6 +6,8 @@ import { registerStopCommand } from './commands/stop.js'
 import { registerStatusCommand } from './commands/status.js'
 import { registerProviderCommand } from './commands/provider.js'
 import { registerDiscoverCommand } from './commands/discover.js'
+import { registerApiKeyCommand } from './commands/api-key.js'
+import { registerVerifyAuditCommand } from './commands/verify-audit.js'
 
 const program = new Command()
 
@@ -20,6 +22,8 @@ registerStopCommand(program)
 registerStatusCommand(program)
 registerProviderCommand(program)
 registerDiscoverCommand(program)
+registerApiKeyCommand(program)
+registerVerifyAuditCommand(program)
 
 export { program }
 
