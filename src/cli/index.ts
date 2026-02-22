@@ -4,6 +4,7 @@ import { registerInitCommand } from './commands/init.js'
 import { registerStartCommand } from './commands/start.js'
 import { registerStopCommand } from './commands/stop.js'
 import { registerStatusCommand } from './commands/status.js'
+import { registerProviderCommand } from './commands/provider.js'
 
 const program = new Command()
 
@@ -16,6 +17,7 @@ registerInitCommand(program)
 registerStartCommand(program)
 registerStopCommand(program)
 registerStatusCommand(program)
+registerProviderCommand(program)
 
 export { program }
 
