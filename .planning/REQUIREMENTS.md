@@ -41,10 +41,10 @@
 
 ### Relationship Registration (RELN)
 
-- [ ] **RELN-01**: RelationshipRecord store with persistent storage (survives restarts)
-- [ ] **RELN-02**: Consent handshake handler (Neuron side of Axon protocol handshake)
-- [ ] **RELN-03**: Relationship queries by patient agent ID, provider NPI, relationship ID, status
-- [ ] **RELN-04**: Challenge-response generation for identity verification
+- [x] **RELN-01**: RelationshipRecord store with persistent storage (survives restarts)
+- [x] **RELN-02**: Consent handshake handler (Neuron side of Axon protocol handshake)
+- [x] **RELN-03**: Relationship queries by patient agent ID, provider NPI, relationship ID, status
+- [x] **RELN-04**: Challenge-response generation for identity verification
 
 ### Relationship Termination (TERM)
 
@@ -175,10 +175,10 @@
 | CSNT-02 | Phase 3 | Complete |
 | CSNT-03 | Phase 3 | Complete |
 | CSNT-04 | Phase 3 | Complete |
-| RELN-01 | Phase 3 | Pending |
-| RELN-02 | Phase 3 | Pending |
-| RELN-03 | Phase 3 | Pending |
-| RELN-04 | Phase 3 | Pending |
+| RELN-01 | Phase 3 | Complete |
+| RELN-02 | Phase 3 | Complete |
+| RELN-03 | Phase 3 | Complete |
+| RELN-04 | Phase 3 | Complete |
 | TERM-01 | Phase 3 | Pending |
 | TERM-02 | Phase 3 | Pending |
 | TERM-03 | Phase 3 | Pending |
