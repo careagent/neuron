@@ -34,10 +34,10 @@
 
 ### Consent Verification (CSNT)
 
-- [ ] **CSNT-01**: Ed25519 consent token verification using Node.js built-in `crypto`
-- [ ] **CSNT-02**: Stateless re-verification on every connection (no cached trust)
-- [ ] **CSNT-03**: Expired consent tokens rejected with specific error code
-- [ ] **CSNT-04**: Consent scope passed to provider CareAgent (Neuron does not interpret scope)
+- [x] **CSNT-01**: Ed25519 consent token verification using Node.js built-in `crypto`
+- [x] **CSNT-02**: Stateless re-verification on every connection (no cached trust)
+- [x] **CSNT-03**: Expired consent tokens rejected with specific error code
+- [x] **CSNT-04**: Consent scope passed to provider CareAgent (Neuron does not interpret scope)
 
 ### Relationship Registration (RELN)
 
@@ -171,10 +171,10 @@
 | NREG-05 | Phase 2 | Complete |
 | NREG-06 | Phase 2 | Complete |
 | NREG-07 | Phase 2 | Complete |
-| CSNT-01 | Phase 3 | Pending |
-| CSNT-02 | Phase 3 | Pending |
-| CSNT-03 | Phase 3 | Pending |
-| CSNT-04 | Phase 3 | Pending |
+| CSNT-01 | Phase 3 | Complete |
+| CSNT-02 | Phase 3 | Complete |
+| CSNT-03 | Phase 3 | Complete |
+| CSNT-04 | Phase 3 | Complete |
 | RELN-01 | Phase 3 | Pending |
 | RELN-02 | Phase 3 | Pending |
 | RELN-03 | Phase 3 | Pending |

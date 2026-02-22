@@ -5,32 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Every NPI-holding organization can connect to the CareAgent network through a free, secure organizational boundary that routes patient connections, verifies consent, and never holds clinical data.
-**Current focus:** Phase 2: Axon Registration (Complete)
+**Current focus:** Phase 3: Consent and Relationships (In Progress)
 
 ## Current Position
 
-Phase: 2 of 9 (Axon Registration) -- COMPLETE
-Plan: 4 of 4 in current phase (all complete)
-Status: Phase 2 Complete
-Last activity: 2026-02-22 -- Completed 02-04-PLAN.md (CLI integration)
+Phase: 3 of 9 (Consent and Relationships) -- IN PROGRESS
+Plan: 1 of 3 in current phase (1 complete)
+Status: Executing Phase 3
+Last activity: 2026-02-22 -- Completed 03-01-PLAN.md (consent token verification)
 
-Progress: [████░░░░░░] 33%
+Progress: [█████░░░░░] 38%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 3min
-- Total execution time: 0.20 hours
+- Total execution time: 0.23 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 02-axon-registration | 4 | 12min | 3min |
+| 03-consent-and-relationships | 1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (3min), 02-03 (2min), 02-02 (4min), 02-04 (3min)
+- Last 5 plans: 02-03 (2min), 02-02 (4min), 02-04 (3min), 03-01 (2min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -59,6 +60,10 @@ Recent decisions affecting current work:
 - [02-04]: IPC handler routing implemented inline in start command via switch on command.type
 - [02-04]: Registration service created before IPC server but start() called after IPC is listening
 - [02-04]: Commander start action is async for registration lifecycle management
+- [03-01]: Ed25519 public key imported via JWK format (kty OKP, crv Ed25519) -- avoids manual DER prefix construction
+- [03-01]: Algorithm parameter null for crypto.verify -- Ed25519 uses SHA-512 internally
+- [03-01]: Verification order: signature first, then JSON parse, then expiration -- rejects invalid before parsing
+- [03-01]: Migration v3 uses DEFAULT empty string for patient_public_key (SQLite ALTER TABLE requirement)
 
 ### Pending Todos
 
@@ -66,12 +71,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- Ed25519 key format must be defined canonically before Phase 3 implementation (cross-repo coordination with patient-core, provider-core)
+- ~~Ed25519 key format must be defined canonically before Phase 3 implementation~~ RESOLVED: base64url-encoded raw 32-byte keys, imported via JWK format (03-01)
 - Axon registry API does not exist yet; Phase 2 mock must be built from Axon PRD contract
 - ProtocolServer interface shape from provider-core needs validation before Phase 4
 
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 02-04-PLAN.md (CLI integration -- Phase 2 complete)
+Stopped at: Completed 03-01-PLAN.md (consent token verification)
 Resume file: None
