@@ -12,6 +12,13 @@ export const NeuronConfigSchema = Type.Object({
     port: Type.Number({ minimum: 1, maximum: 65535, default: 3000 }),
     host: Type.String({ default: '0.0.0.0' }),
   }),
+  websocket: Type.Object({
+    path: Type.String({ default: '/ws/handshake' }),
+    maxConcurrentHandshakes: Type.Number({ minimum: 1, default: 10 }),
+    authTimeoutMs: Type.Number({ minimum: 1000, default: 10000 }),
+    queueTimeoutMs: Type.Number({ minimum: 1000, default: 30000 }),
+    maxPayloadBytes: Type.Number({ minimum: 1024, default: 65536 }),
+  }),
   storage: Type.Object({
     path: Type.String({ default: './data/neuron.db' }),
   }),

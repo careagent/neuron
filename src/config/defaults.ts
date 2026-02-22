@@ -9,6 +9,13 @@ export const DEFAULT_CONFIG: Omit<NeuronConfig, 'organization'> & {
     port: 3000,
     host: '0.0.0.0',
   },
+  websocket: {
+    path: '/ws/handshake',
+    maxConcurrentHandshakes: 10,
+    authTimeoutMs: 10000,
+    queueTimeoutMs: 30000,
+    maxPayloadBytes: 65536,
+  },
   storage: {
     path: './data/neuron.db',
   },
