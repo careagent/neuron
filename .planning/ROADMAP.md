@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Neuron is built along its dependency chain: foundation infrastructure first (config, audit, storage, types), then outward-facing network registration with Axon, then the consent/relationship trust layer that gates all communication, then WebSocket routing that connects patients to providers, then local network discovery as an alternative entry point, then the REST API that exposes operational data to third parties, then patient chart sync as the final domain feature, and finally end-to-end integration testing and documentation that validates everything works together. Each phase delivers a complete, verifiable capability that subsequent phases build upon.
+The Neuron is built along its dependency chain: foundation infrastructure first (config, audit, storage, types), then outward-facing network registration with Axon, then the consent/relationship trust layer that gates all communication, then WebSocket routing that connects patients to providers, then local network discovery as an alternative entry point, then the REST API that exposes operational data to third parties, and finally end-to-end integration testing and documentation that validates everything works together. Each phase delivers a complete, verifiable capability that subsequent phases build upon.
 
 ## Phases
 
@@ -17,10 +17,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Consent and Relationships** - Ed25519 consent verification, relationship store, and termination lifecycle (completed 2026-02-22)
 - [ ] **Phase 4: WebSocket Routing** - Patient-to-provider session routing with backpressure and concurrency control
 - [x] **Phase 5: Local Discovery** - mDNS/DNS-SD advertisement for local network CareAgent connections (completed 2026-02-22)
-- [ ] **Phase 6: REST API** - Third-party HTTP API with auth, rate limiting, CORS, and OpenAPI spec
-- [ ] **Phase 7: Patient Chart Sync** - Incremental chart sync over WebSocket with revocation purge
-- [ ] **Phase 8: Integration and Documentation** - E2E tests across all functionalities and reference documentation
-- [ ] **Phase 9: Foundation Tech Debt** - Wire neuron stop, add missing audit producers, add audit verification CLI command (gap closure)
+- [x] **Phase 6: REST API** - Third-party HTTP API with auth, rate limiting, CORS, and OpenAPI spec (completed 2026-02-22)
+- [ ] **Phase 7: Integration and Documentation** - E2E tests across all functionalities and reference documentation
+- [ ] **Phase 8: Foundation Tech Debt** - Wire neuron stop, add missing audit producers, add audit verification CLI command (gap closure)
 
 ## Phase Details
 
@@ -122,59 +121,44 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — API key data model, store, rate limiter, config extension, and HTTP utilities (TDD)
-- [ ] 06-02-PLAN.md — REST API router with auth, CORS, rate limiting, route handlers, and OpenAPI 3.1 spec
-- [ ] 06-03-PLAN.md — API key CLI commands and start command REST wiring
+- [x] 06-01-PLAN.md — API key data model, store, rate limiter, config extension, and HTTP utilities (TDD)
+- [x] 06-02-PLAN.md — REST API router with auth, CORS, rate limiting, route handlers, and OpenAPI 3.1 spec
+- [x] 06-03-PLAN.md — API key CLI commands and start command REST wiring
 
-### Phase 7: Patient Chart Sync
-**Goal**: Patient CareAgents can push incremental chart updates to the Neuron over established sessions, and access revocation purges all cached data
-**Depends on**: Phase 4, Phase 3
-**Requirements**: SYNC-01, SYNC-02, SYNC-03, SYNC-04, SYNC-05
-**Success Criteria** (what must be TRUE):
-  1. A patient CareAgent with chart-read consent can push incremental chart updates over an established WebSocket session
-  2. A sync request from a relationship without `chart_read` in consented_actions is rejected with a specific authorization error
-  3. Subsequent syncs only transfer entries newer than the last-sync-timestamp for that relationship
-  4. When chart access is revoked for a relationship, all cached chart entries for that relationship are purged and future sync requests are rejected
-**Plans**: TBD
-
-Plans:
-- [ ] 07-01: TBD
-
-### Phase 8: Integration and Documentation
+### Phase 7: Integration and Documentation
 **Goal**: All core functionalities work together end-to-end, and operators have reference documentation for deployment and integration
-**Depends on**: Phase 7, Phase 6, Phase 5
+**Depends on**: Phase 6, Phase 5
 **Requirements**: INTG-01, INTG-02, INTG-03, INTG-04, INTG-05, INTG-06
 **Success Criteria** (what must be TRUE):
   1. E2E test passes: full lifecycle from init through register, add provider, patient connect, consent handshake, session, and termination
   2. E2E test passes: local mDNS discovery through consent-verified connection
   3. E2E test passes: REST API key creation with rate limiting enforcement
-  4. E2E test passes: chart sync authorization, incremental sync, revocation, and cache purge
-  5. Documentation exists: REST API documentation (`docs/api.md`), architecture guide with data flow (`docs/architecture.md`), and configuration reference (`docs/configuration.md`)
+  4. Documentation exists: REST API documentation (`docs/api.md`), architecture guide with data flow (`docs/architecture.md`), and configuration reference (`docs/configuration.md`)
 **Plans**: TBD
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
-- [ ] 08-03: TBD
+- [ ] 07-01: TBD
+- [ ] 07-02: TBD
+- [ ] 07-03: TBD
 
-### Phase 9: Foundation Tech Debt
+### Phase 8: Foundation Tech Debt
 **Goal**: Close tech debt gaps from v1.0 audit — wire `neuron stop` to IPC, add missing audit event producers, and expose audit chain verification via CLI
 **Depends on**: Phase 2 (IPC layer required for stop signal)
 **Requirements**: FOUN-06, AUDT-02, AUDT-03
 **Gap Closure:** Closes gaps from v1.0 milestone audit
 **Success Criteria** (what must be TRUE):
   1. `neuron stop` sends a shutdown signal via IPC to a running Neuron process and it exits cleanly
-  2. Audit events are emitted for all 7 categories defined in the schema (registration, connection, consent, api_access, sync, admin, termination) — the 3 missing categories (connection, api_access, sync) have producers wired at their natural trigger points
+  2. Audit events are emitted for all 6 categories defined in the schema (registration, connection, consent, api_access, admin, termination) — the 2 missing categories (connection, api_access) have producers wired at their natural trigger points
   3. `neuron verify-audit` CLI command runs `verifyAuditChain()` and reports chain integrity status
 **Plans**: TBD
 
 Plans:
-- [ ] 09-01: TBD
+- [ ] 08-01: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 through 9. Phase 9 (gap closure) depends on Phase 2 (IPC layer) and can be executed any time after Phase 2 completes.
+Phases execute in numeric order: 1 through 8. Phase 8 (gap closure) depends on Phase 2 (IPC layer) and can be executed any time after Phase 2 completes.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -183,7 +167,6 @@ Phases execute in numeric order: 1 through 9. Phase 9 (gap closure) depends on P
 | 3. Consent and Relationships | 3/3 | Complete | 2026-02-22 |
 | 4. WebSocket Routing | 4/4 | Complete | 2026-02-22 |
 | 5. Local Discovery | 2/2 | Complete | 2026-02-22 |
-| 6. REST API | 0/3 | Not started | - |
-| 7. Patient Chart Sync | 0/1 | Not started | - |
-| 8. Integration and Documentation | 0/3 | Not started | - |
-| 9. Foundation Tech Debt | 0/1 | Not started | - |
+| 6. REST API | 3/3 | Complete | 2026-02-22 |
+| 7. Integration and Documentation | 0/3 | Not started | - |
+| 8. Foundation Tech Debt | 0/1 | Not started | - |

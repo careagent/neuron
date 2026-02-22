@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Every NPI-holding organization can connect to the CareAgent network through a free, secure organizational boundary that routes patient connections, verifies consent, and never holds clinical data.
-**Current focus:** Phase 6: REST API
+**Current focus:** Phase 7: Integration and Documentation
 
 ## Current Position
 
-Phase: 6 of 9 (REST API)
+Phase: 7 of 8 (Integration and Documentation)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-02-22 -- Phase 5 complete, removed Scheduling/Billing from v1, transitioning to Phase 6 (REST API)
+Last activity: 2026-02-22 -- Patient Chart Sync removed from v1 (Neuron never touches patient data); advancing to Phase 7
 
-Progress: [█████████████████████] 17/17 plans (100% of planned so far)
+Progress: [████████████████████████] 20/20 plans (100% of planned so far)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
-- Average duration: 2.8min
-- Total execution time: 0.58 hours
+- Total plans completed: 16
+- Average duration: 3.1min
+- Total execution time: 0.82 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [█████████████████████] 17/1
 | 03-consent-and-relationships | 3 | 7min | 2.3min |
 | 04-websocket-routing | 4 | 10min | 2.5min |
 | 05-local-discovery | 2 | 8min | 4min |
+| 06-rest-api | 3 | 18min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (3min), 04-03 (3min), 04-04 (2min), 05-01 (5min), 05-02 (3min)
+- Last 5 plans: 05-01 (5min), 05-02 (3min), 06-01 (4min), 06-02 (8min), 06-03 (6min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -46,8 +47,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
 - [Roadmap]: SQLite via better-sqlite3 as primary storage engine from day one (research recommendation; query patterns demand indexing)
-- [Roadmap]: 9-phase structure following dependency chain: foundation, registration, consent/relationships, routing, discovery, scheduling/billing, REST API, chart sync, integration
-- [Roadmap]: Phase 6 (Scheduling/Billing) depends only on Phase 3 (Relationships) but sequenced after Phase 5 for clean build order
+- [Roadmap]: 8-phase structure following dependency chain: foundation, registration, consent/relationships, routing, discovery, REST API, integration, tech debt
 - [02-01]: Single-row enforcement via CHECK(id=1) constraint on neuron_registration table
 - [02-01]: Mock Axon uses in-memory Map state, fresh per run for test reliability
 - [02-01]: Mock server outputs ready signal on stdout for test harness integration
@@ -77,7 +77,7 @@ Recent decisions affecting current work:
 - [04-01]: Messages use typed JSON envelopes with discriminant type field for dispatch
 - [04-01]: InboundHandshakeMessage union covers auth and challenge_response (patient-to-Neuron only)
 - [04-01]: HandshakeComplete status field distinguishes new vs existing relationships
-- [04-02]: ws library in noServer mode attached to node:http server for Phase 7 REST API port sharing
+- [04-02]: ws library in noServer mode attached to node:http server for REST API port sharing
 - [04-02]: Safety ceiling queues connections (never rejects) with configurable queue timeout
 - [04-02]: Existing active relationships return existing relationship_id without creating duplicate
 - [04-02]: Early consent token verification extracts provider_npi before challenge-response (stateless re-verify per CSNT-02)
@@ -97,6 +97,17 @@ Recent decisions affecting current work:
 - [05-02]: getLocalAddress() resolves first non-internal IPv4 when server binds to 0.0.0.0
 - [05-02]: neuron discover is one-shot mode with configurable timeout (default 3s)
 - [05-02]: DISC-04 satisfied by design -- local connections use same WebSocket endpoint and consent handler
+- [06-01]: API keys use `nrn_` prefix (modeled after Stripe's sk_/pk_ convention) for easy identification
+- [06-01]: Raw keys shown once at creation, only SHA-256 hash stored -- prevents exposure from database breach
+- [06-01]: Timing-safe comparison via crypto.timingSafeEqual on Buffer.from(hash, 'hex') to prevent timing attacks
+- [06-01]: Token bucket refills proportionally based on elapsed time (not fixed intervals)
+- [06-02]: Router ignores non-API paths (not /v1/* and not /openapi.json) to avoid WebSocket conflicts
+- [06-02]: CORS headers set before auth/error so preflight OPTIONS always works without API key
+- [06-02]: OpenAPI spec at /openapi.json is public (no auth required)
+- [06-02]: ApiRouterDeps includes storage: StorageEngine because RelationshipStore lacks findAll
+- [06-03]: API key CLI commands use direct SQLite access (offline) -- no running Neuron required
+- [06-03]: REST router attached via httpServer.on('request') after protocolServer.start() completes
+- [06-03]: Rate limiter configured with refill = maxRequests (full refill each window)
 
 ### Pending Todos
 
@@ -111,5 +122,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-rest-api/06-CONTEXT.md
+Stopped at: Patient Chart Sync removed, ready for Phase 7 (Integration and Documentation)
+Resume file: N/A

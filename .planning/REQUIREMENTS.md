@@ -19,7 +19,7 @@
 ### Audit Logging (AUDT)
 
 - [ ] **AUDT-01**: Hash-chained JSONL audit log with SHA-256 tamper-evident chain (deterministic serialization)
-- [ ] **AUDT-02**: Audit events for: registration, connection, consent, API access, sync, admin, termination
+- [ ] **AUDT-02**: Audit events for: registration, connection, consent, API access, admin, termination
 - [ ] **AUDT-03**: Audit chain integrity verification utility
 
 ### National Registration (NREG)
@@ -80,23 +80,14 @@
 - [ ] **TAPI-06**: OpenAPI 3.1 specification generated from route definitions, served at `GET /openapi.json`
 - [ ] **TAPI-07**: API key management via CLI (`neuron api-key create/revoke/list`)
 
-### Patient Chart Sync (SYNC)
-
-- [ ] **SYNC-01**: Sync receiver accepting incremental chart updates over established WebSocket sessions
-- [ ] **SYNC-02**: Authorization check (relationship must grant chart read access in consented_actions)
-- [ ] **SYNC-03**: CachedChartEntry store with persistence and SHA-256 integrity verification
-- [ ] **SYNC-04**: Incremental sync with last-sync-timestamp tracking per relationship
-- [ ] **SYNC-05**: Access revocation: purge all cached entries for relationship and stop accepting sync data
-
 ### Integration & Documentation (INTG)
 
 - [ ] **INTG-01**: E2E test: full lifecycle (init -> register -> add provider -> patient connects -> consent -> session -> terminate)
 - [ ] **INTG-02**: E2E test: local discovery flow (mDNS advertise -> discover -> connect -> consent)
 - [ ] **INTG-03**: E2E test: REST API key creation, organization/relationship endpoints, rate limiting
-- [ ] **INTG-04**: E2E test: chart sync and revocation (authorize -> sync -> revoke -> purge)
-- [ ] **INTG-05**: REST API documentation (`docs/api.md`) with endpoint reference and request/response examples
-- [ ] **INTG-06**: Architecture guide (`docs/architecture.md`) with data flow diagrams
-- [ ] **INTG-07**: Configuration reference (`docs/configuration.md`) with all options and environment variables
+- [ ] **INTG-04**: REST API documentation (`docs/api.md`) with endpoint reference and request/response examples
+- [ ] **INTG-05**: Architecture guide (`docs/architecture.md`) with data flow diagrams
+- [ ] **INTG-06**: Configuration reference (`docs/configuration.md`) with all options and environment variables
 
 ## v2 Requirements
 
@@ -130,6 +121,14 @@
 - **BILL-05**: Claims submission to payers
 - **SCHED-05**: External calendar integration (Google Calendar, Outlook)
 
+### Patient Chart Sync (deferred from v1)
+
+- **SYNC-01**: Sync receiver accepting incremental chart updates over established WebSocket sessions
+- **SYNC-02**: Authorization check (relationship must grant chart read access in consented_actions)
+- **SYNC-03**: CachedChartEntry store with persistence and SHA-256 integrity verification
+- **SYNC-04**: Incremental sync with last-sync-timestamp tracking per relationship
+- **SYNC-05**: Access revocation: purge all cached entries for relationship and stop accepting sync data
+
 ### Integrations
 
 - **SDK-01**: Full `@careagent/neuron-sdk` TypeScript client package
@@ -147,6 +146,7 @@
 | Real-time clinical messaging | Neuron routes sessions, not clinical messages; content flows peer-to-peer |
 | Credential issuance | Neuron verifies credentials, does not issue them |
 | Scheduling/billing data storage | Removed from v1 — Neuron is routing/consent infrastructure, not an operational data store |
+| Patient chart sync/caching | Removed from v1 — Neuron never touches patient data; chart sync belongs in patient-core or provider-core |
 
 ## Traceability
 
@@ -157,12 +157,12 @@
 | FOUN-03 | Phase 1 | Pending |
 | FOUN-04 | Phase 1 | Pending |
 | FOUN-05 | Phase 1 | Pending |
-| FOUN-06 | Phase 1, Phase 10 | Pending |
+| FOUN-06 | Phase 1, Phase 8 | Pending |
 | FOUN-07 | Phase 1 | Pending |
 | FOUN-08 | Phase 1 | Complete |
 | AUDT-01 | Phase 1 | Pending |
-| AUDT-02 | Phase 1, Phase 10 | Pending |
-| AUDT-03 | Phase 1, Phase 10 | Pending |
+| AUDT-02 | Phase 1, Phase 8 | Pending |
+| AUDT-03 | Phase 1, Phase 8 | Pending |
 | NREG-01 | Phase 2 | Complete |
 | NREG-02 | Phase 2 | Complete |
 | NREG-03 | Phase 2 | Complete |
@@ -199,24 +199,18 @@
 | TAPI-05 | Phase 6 | Pending |
 | TAPI-06 | Phase 6 | Pending |
 | TAPI-07 | Phase 6 | Pending |
-| SYNC-01 | Phase 7 | Pending |
-| SYNC-02 | Phase 7 | Pending |
-| SYNC-03 | Phase 7 | Pending |
-| SYNC-04 | Phase 7 | Pending |
-| SYNC-05 | Phase 7 | Pending |
-| INTG-01 | Phase 8 | Pending |
-| INTG-02 | Phase 8 | Pending |
-| INTG-03 | Phase 8 | Pending |
-| INTG-04 | Phase 8 | Pending |
-| INTG-05 | Phase 8 | Pending |
-| INTG-06 | Phase 8 | Pending |
-| INTG-07 | Phase 8 | Pending |
+| INTG-01 | Phase 7 | Pending |
+| INTG-02 | Phase 7 | Pending |
+| INTG-03 | Phase 7 | Pending |
+| INTG-04 | Phase 7 | Pending |
+| INTG-05 | Phase 7 | Pending |
+| INTG-06 | Phase 7 | Pending |
 
 **Coverage:**
-- v1 requirements: 59 total
-- Mapped to phases: 58
+- v1 requirements: 53 total
+- Mapped to phases: 53
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-21 after roadmap creation*
+*Last updated: 2026-02-22 after Patient Chart Sync removal*

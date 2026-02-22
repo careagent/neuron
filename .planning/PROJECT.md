@@ -41,11 +41,8 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - [ ] Provider-initiated termination with state protocol compliance
 - [ ] Terminated relationships permanently stop routing
 - [ ] Bidirectional session bridge between patient and provider
-- [ ] Patient Chart sync receiver with authorization check
-- [ ] Incremental sync with last-sync-timestamp tracking
-- [ ] Access revocation: purge cached entries
 - [ ] Hash-chained JSONL audit log with SHA-256 tamper-evident chain
-- [ ] E2E integration tests covering all 9 core functionalities
+- [ ] E2E integration tests covering all core functionalities
 - [ ] REST API documentation, architecture guide, configuration reference
 
 ### Out of Scope
@@ -56,6 +53,7 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - EMR replacement — minimal operational data layer only
 - Direct Axon exposure for third parties — closed protocol layer
 - Patient identity storage — opaque relationship_id only
+- Patient chart sync/caching (v1) — Neuron never touches patient data; belongs in patient-core or provider-core
 - BLE/NFC discovery (v1) — platform-specific native modules
 - Multi-site clustering (v1) — distributed systems complexity
 - Production database (v1) — file-backed JSON or SQLite sufficient
@@ -104,9 +102,10 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 |----------|-----------|---------|
 | Standalone server, not plugin | Neuron owns its own process lifecycle; zero-dep constraint applies to plugins, not servers | — Pending |
 | Scheduling/billing removed from v1 | Neuron should stay focused on routing/consent/discovery; operational data is a separate concern | Phase 5 transition |
+| Patient chart sync removed from v1 | Neuron never touches patient data; chart sync belongs in patient-core or provider-core | Phase 6 transition |
 | Node.js built-in http (no framework) | Consistency with ecosystem; minimal deps | — Pending |
 | Hash-chained JSONL audit log | Tamper-evident operational audit trail | — Pending |
-| ws in noServer mode for WebSocket | Shares HTTP server with Phase 7 REST API; one port for all traffic | Phase 4 |
+| ws in noServer mode for WebSocket | Shares HTTP server with REST API; one port for all traffic | Phase 4 |
 | Broker-and-step-out model (not relay bridge) | Neuron completes address exchange and closes; no persistent relay | Phase 4 |
 | Global handshake ceiling with queuing | Connections queued, never rejected; queue timeout for graceful degradation | Phase 4 |
 | mDNS/DNS-SD for local discovery (v1) | BLE/NFC deferred due to platform-specific complexity | Phase 5 |
@@ -117,4 +116,4 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 | Read-only REST API in v1 | All endpoints GET; API key management via CLI only | Phase 6 |
 
 ---
-*Last updated: 2026-02-22 after Phase 6*
+*Last updated: 2026-02-22 after Phase 7 removal (Patient Chart Sync)*
