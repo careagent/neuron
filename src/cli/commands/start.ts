@@ -1,4 +1,5 @@
 import { mkdirSync, unlinkSync } from 'node:fs'
+import { networkInterfaces } from 'node:os'
 import { dirname } from 'node:path'
 import type { Command } from 'commander'
 import { loadConfig, ConfigError } from '../../config/index.js'
@@ -8,8 +9,26 @@ import { startIpcServer, getSocketPath, type IpcHandler } from '../../ipc/index.
 import { AxonRegistrationService } from '../../registration/index.js'
 import { RelationshipStore, TerminationHandler, ConsentHandshakeHandler } from '../../relationships/index.js'
 import { NeuronProtocolServer, createConnectionHandler } from '../../routing/index.js'
+import { DiscoveryService } from '../../discovery/index.js'
 import type { IpcCommand, IpcResponse } from '../../ipc/index.js'
 import { output } from '../output.js'
+
+/**
+ * Get the first non-internal IPv4 address for mDNS endpoint construction.
+ * Falls back to 127.0.0.1 if no suitable address is found.
+ */
+function getLocalAddress(): string {
+  const interfaces = networkInterfaces()
+  for (const addrs of Object.values(interfaces)) {
+    if (!addrs) continue
+    for (const addr of addrs) {
+      if (!addr.internal && addr.family === 'IPv4') {
+        return addr.address
+      }
+    }
+  }
+  return '127.0.0.1'
+}
 
 /**
  * Register the `start` command on the Commander program.
@@ -148,6 +167,36 @@ export function registerStartCommand(program: Command): void {
       await protocolServer.start(config.server.port)
       output.info(`WebSocket server listening on port ${config.server.port} at ${config.websocket.path}`)
 
+      // 6b. Start local network discovery (if enabled)
+      let discoveryService: DiscoveryService | null = null
+      if (config.localNetwork.enabled) {
+        const host = config.server.host === '0.0.0.0' ? getLocalAddress() : config.server.host
+        const endpointUrl = `ws://${host}:${config.server.port}${config.websocket.path}`
+        discoveryService = new DiscoveryService({
+          enabled: true,
+          serviceType: config.localNetwork.serviceType,
+          protocolVersion: config.localNetwork.protocolVersion,
+          organizationNpi: config.organization.npi,
+          serverPort: config.server.port,
+          endpointUrl,
+        })
+        await discoveryService.start()
+
+        // Log advertising interfaces (info-level per user decision)
+        const interfaces = networkInterfaces()
+        for (const [name, addrs] of Object.entries(interfaces)) {
+          if (!addrs) continue
+          for (const addr of addrs) {
+            if (!addr.internal && addr.family === 'IPv4') {
+              output.info(`Advertising on ${name}: ${addr.address}`)
+            }
+          }
+        }
+        output.info(`Local discovery active: _${config.localNetwork.serviceType}._tcp`)
+      } else {
+        output.info('Local network discovery disabled')
+      }
+
       // 7. Start Axon registration
       try {
         await registrationService.start()
@@ -171,7 +220,16 @@ export function registerStartCommand(program: Command): void {
       const shutdown = async () => {
         clearInterval(keepAlive)
 
-        // Stop WebSocket server first (closes all active handshake connections)
+        // Stop local discovery first (sends goodbye packets)
+        if (discoveryService) {
+          try {
+            await discoveryService.stop()
+          } catch {
+            // Ignore stop errors during shutdown
+          }
+        }
+
+        // Stop WebSocket server (closes all active handshake connections)
         try {
           await protocolServer.stop()
         } catch {
