@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 4 of 9 (WebSocket Routing)
-Plan: 3 of 3 in current phase (3 complete)
+Plan: 4 of 4 in current phase (4 complete)
 Status: Phase 4 Complete
-Last activity: 2026-02-22 -- Completed 04-03-PLAN.md (CLI wiring and integration tests)
+Last activity: 2026-02-22 -- Completed 04-04-PLAN.md (Gap closure: ROADMAP SC-2/SC-3, audit event, dead code)
 
-Progress: [██████░░░░] 63%
+Progress: [██████░░░░] 65%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 2.7min
-- Total execution time: 0.45 hours
+- Total plans completed: 11
+- Average duration: 2.6min
+- Total execution time: 0.48 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [██████░░░░] 63%
 |-------|-------|-------|----------|
 | 02-axon-registration | 4 | 12min | 3min |
 | 03-consent-and-relationships | 3 | 7min | 2.3min |
-| 04-websocket-routing | 3 | 8min | 2.7min |
+| 04-websocket-routing | 4 | 10min | 2.5min |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (2min), 04-01 (2min), 04-02 (3min), 04-03 (3min)
+- Last 5 plans: 03-03 (2min), 04-01 (2min), 04-02 (3min), 04-03 (3min), 04-04 (2min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -86,6 +86,8 @@ Recent decisions affecting current work:
 - [04-03]: protocolServer.stop() is first in shutdown pipeline (before registration, IPC, storage)
 - [04-03]: CLI tests mock routing module to prevent port conflicts during unit testing
 - [04-03]: Integration tests use ephemeral port (0) and real WebSocket connections for end-to-end verification
+- [04-04]: provider_npi set to 'unknown' in early consent failure audit because NPI extraction has not yet succeeded
+- [04-04]: Audit-before-close pattern applied consistently to all failure paths in handler.ts
 
 ### Pending Todos
 
@@ -100,5 +102,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 04-03-PLAN.md (CLI wiring and integration tests) -- Phase 4 complete
+Stopped at: Completed 04-04-PLAN.md (Gap closure) -- Phase 4 fully complete with all gaps closed
 Resume file: None
