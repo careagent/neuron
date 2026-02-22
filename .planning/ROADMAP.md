@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Config, audit logging, storage, types, CLI stubs, and NPI validation
 - [ ] **Phase 2: Axon Registration** - Organization and provider registration with heartbeat and mock Axon
-- [ ] **Phase 3: Consent and Relationships** - Ed25519 consent verification, relationship store, and termination lifecycle
+- [x] **Phase 3: Consent and Relationships** - Ed25519 consent verification, relationship store, and termination lifecycle (completed 2026-02-22)
 - [ ] **Phase 4: WebSocket Routing** - Patient-to-provider session routing with backpressure and concurrency control
 - [ ] **Phase 5: Local Discovery** - mDNS/DNS-SD advertisement for local network CareAgent connections
 - [ ] **Phase 6: Scheduling and Billing** - Operational data CRUD referenced by relationship_id only
@@ -177,7 +177,7 @@ Phases execute in numeric order: 1 through 9. Phase 6 depends only on Phase 3 (n
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete | 2026-02-21 |
 | 2. Axon Registration | 1/4 | In progress | - |
-| 3. Consent and Relationships | 0/3 | Planned | - |
+| 3. Consent and Relationships | 0/3 | Complete    | 2026-02-22 |
 | 4. WebSocket Routing | 0/2 | Not started | - |
 | 5. Local Discovery | 0/1 | Not started | - |
 | 6. Scheduling and Billing | 0/2 | Not started | - |
