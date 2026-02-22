@@ -36,4 +36,13 @@ export const DEFAULT_CONFIG: Omit<NeuronConfig, 'organization'> & {
     endpointUrl: 'http://localhost:3000',
     backoffCeilingMs: 300000,
   },
+  api: {
+    rateLimit: {
+      maxRequests: 100,
+      windowMs: 60000,
+    },
+    cors: {
+      allowedOrigins: [],
+    },
+  },
 }

@@ -133,6 +133,21 @@ export const migrations: Migration[] = [
     description: 'Add patient_public_key to relationships table',
     up: `ALTER TABLE relationships ADD COLUMN patient_public_key TEXT NOT NULL DEFAULT '';`,
   },
+  {
+    version: 4,
+    description: 'Create api_keys table for REST API authentication',
+    up: `
+      CREATE TABLE IF NOT EXISTS api_keys (
+        key_id TEXT PRIMARY KEY,
+        key_hash TEXT NOT NULL UNIQUE,
+        name TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        revoked_at TEXT,
+        last_used_at TEXT
+      );
+      CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON api_keys(key_hash);
+    `,
+  },
 ]
 
 /**

@@ -39,6 +39,15 @@ export const NeuronConfigSchema = Type.Object({
     endpointUrl: Type.String({ default: 'http://localhost:3000' }),
     backoffCeilingMs: Type.Number({ minimum: 1000, default: 300000 }),
   }),
+  api: Type.Object({
+    rateLimit: Type.Object({
+      maxRequests: Type.Number({ minimum: 1, default: 100 }),
+      windowMs: Type.Number({ minimum: 1000, default: 60000 }),
+    }),
+    cors: Type.Object({
+      allowedOrigins: Type.Array(Type.String(), { default: [] }),
+    }),
+  }),
 })
 
 export type NeuronConfig = Static<typeof NeuronConfigSchema>

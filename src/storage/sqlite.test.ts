@@ -60,7 +60,7 @@ describe('SqliteStorage', () => {
     it('should record migration version', () => {
       storage.initialize()
       const row = storage.get<{ version: number }>('SELECT MAX(version) as version FROM schema_version')
-      expect(row?.version).toBe(3)
+      expect(row?.version).toBe(4)
     })
   })
 

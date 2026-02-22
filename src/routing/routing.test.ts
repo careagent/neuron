@@ -145,6 +145,10 @@ describe('WebSocket Routing Integration', () => {
       endpointUrl: neuronEndpointUrl,
       backoffCeilingMs: 300000,
     },
+    api: {
+      rateLimit: { maxRequests: 100, windowMs: 60000 },
+      cors: { allowedOrigins: [] },
+    },
   }
 
   beforeEach(async () => {

@@ -89,6 +89,10 @@ function createTestConfig(overrides?: Partial<NeuronConfig>): NeuronConfig {
       endpointUrl: 'http://localhost:3000',
       backoffCeilingMs: 300000,
     },
+    api: {
+      rateLimit: { maxRequests: 100, windowMs: 60000 },
+      cors: { allowedOrigins: [] },
+    },
     ...overrides,
   }
 }
@@ -528,6 +532,10 @@ describe('AxonRegistrationService', () => {
         registryUrl: MOCK_BASE,
         endpointUrl: 'http://localhost:3000',
         backoffCeilingMs: 300000,
+      },
+      api: {
+        rateLimit: { maxRequests: 100, windowMs: 60000 },
+        cors: { allowedOrigins: [] },
       },
     }
   }

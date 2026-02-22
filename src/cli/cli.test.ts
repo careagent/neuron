@@ -131,6 +131,10 @@ describe('CLI', () => {
           endpointUrl: 'http://localhost:3000',
           backoffCeilingMs: 300000,
         },
+        api: {
+          rateLimit: { maxRequests: 100, windowMs: 60000 },
+          cors: { allowedOrigins: [] },
+        },
       }),
     )
 
@@ -323,6 +327,10 @@ describe('CLI', () => {
             registryUrl: 'http://localhost:9999',
             endpointUrl: 'http://localhost:3000',
             backoffCeilingMs: 300000,
+          },
+          api: {
+            rateLimit: { maxRequests: 100, windowMs: 60000 },
+            cors: { allowedOrigins: [] },
           },
         }),
       )
