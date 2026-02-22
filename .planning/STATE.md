@@ -111,5 +111,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Phase 5 complete, ready to plan Phase 6 (REST API)
-Resume file: None
+Stopped at: Phase 6 context gathered
+Resume file: .planning/phases/06-rest-api/06-CONTEXT.md
