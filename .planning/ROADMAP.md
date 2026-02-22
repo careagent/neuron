@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 4: WebSocket Routing** - Patient-to-provider session routing with backpressure and concurrency control
 - [x] **Phase 5: Local Discovery** - mDNS/DNS-SD advertisement for local network CareAgent connections (completed 2026-02-22)
 - [x] **Phase 6: REST API** - Third-party HTTP API with auth, rate limiting, CORS, and OpenAPI spec (completed 2026-02-22)
-- [ ] **Phase 7: Integration and Documentation** - E2E tests across all functionalities and reference documentation
+- [x] **Phase 7: Integration and Documentation** - E2E tests across all functionalities and reference documentation (2026-02-22)
 - [ ] **Phase 8: Foundation Tech Debt** - Wire neuron stop, add missing audit producers, add audit verification CLI command (gap closure)
 
 ## Phase Details
@@ -137,9 +137,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — E2E test harness and full lifecycle integration test
-- [ ] 07-02-PLAN.md — E2E mDNS discovery and REST API tests
-- [ ] 07-03-PLAN.md — REST API reference, architecture guide, and configuration reference documentation
+- [x] 07-01-PLAN.md — E2E test harness and full lifecycle integration test (2026-02-22)
+- [x] 07-02-PLAN.md — E2E mDNS discovery and REST API tests (2026-02-22)
+- [x] 07-03-PLAN.md — REST API reference, architecture guide, and configuration reference documentation (2026-02-22)
 
 ### Phase 8: Foundation Tech Debt
 **Goal**: Close tech debt gaps from v1.0 audit — wire `neuron stop` to IPC, add missing audit event producers, and expose audit chain verification via CLI
@@ -168,5 +168,5 @@ Phases execute in numeric order: 1 through 8. Phase 8 (gap closure) depends on P
 | 4. WebSocket Routing | 4/4 | Complete | 2026-02-22 |
 | 5. Local Discovery | 2/2 | Complete | 2026-02-22 |
 | 6. REST API | 3/3 | Complete | 2026-02-22 |
-| 7. Integration and Documentation | 0/3 | Not started | - |
+| 7. Integration and Documentation | 3/3 | Complete | 2026-02-22 |
 | 8. Foundation Tech Debt | 0/1 | Not started | - |
