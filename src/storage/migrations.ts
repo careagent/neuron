@@ -128,6 +128,11 @@ export const migrations: Migration[] = [
       );
     `,
   },
+  {
+    version: 3,
+    description: 'Add patient_public_key to relationships table',
+    up: `ALTER TABLE relationships ADD COLUMN patient_public_key TEXT NOT NULL DEFAULT '';`,
+  },
 ]
 
 /**

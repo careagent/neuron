@@ -17,6 +17,7 @@ export const RelationshipRecordSchema = Type.Object({
   provider_npi: NpiString,
   status: RelationshipStatus,
   consented_actions: Type.Array(Type.String()),
+  patient_public_key: Type.String(),
   created_at: IsoDateString,
   updated_at: IsoDateString,
 })
