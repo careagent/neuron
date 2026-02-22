@@ -134,12 +134,12 @@ Plans:
   2. E2E test passes: local mDNS discovery through consent-verified connection
   3. E2E test passes: REST API key creation with rate limiting enforcement
   4. Documentation exists: REST API documentation (`docs/api.md`), architecture guide with data flow (`docs/architecture.md`), and configuration reference (`docs/configuration.md`)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
-- [ ] 07-03: TBD
+- [ ] 07-01-PLAN.md — E2E test harness and full lifecycle integration test
+- [ ] 07-02-PLAN.md — E2E mDNS discovery and REST API tests
+- [ ] 07-03-PLAN.md — REST API reference, architecture guide, and configuration reference documentation
 
 ### Phase 8: Foundation Tech Debt
 **Goal**: Close tech debt gaps from v1.0 audit — wire `neuron stop` to IPC, add missing audit event producers, and expose audit chain verification via CLI
