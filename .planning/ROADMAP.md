@@ -84,8 +84,8 @@ Plans:
 **Requirements**: ROUT-01, ROUT-02, ROUT-03, ROUT-04, ROUT-05, ROUT-06
 **Success Criteria** (what must be TRUE):
   1. A patient CareAgent with a valid consent token and active relationship connects via WebSocket and is routed to the correct provider CareAgent
-  2. Messages flow bidirectionally between patient and provider through the session bridge with backpressure handling (no unbounded memory growth)
-  3. Per-provider concurrency limits are enforced; the 11th simultaneous connection to a provider with limit 10 is rejected with a clear error
+  2. After consent verification and challenge-response, the Neuron completes the address exchange (patient receives provider_endpoint, relationship recorded) and closes the connection — the broker-and-step-out model with connection queuing prevents unbounded memory growth
+  3. A global handshake safety ceiling (configurable maxConcurrentHandshakes, default 10) queues connections beyond the limit rather than rejecting them; queued connections are promoted as slots open or time out gracefully
   4. When either side disconnects, the session is cleaned up gracefully (all listeners removed, both sockets closed, session tracking updated)
   5. The Neuron satisfies the `ProtocolServer` interface from provider-core (`start`, `stop`, `activeSessions`)
 **Plans**: 4 plans
