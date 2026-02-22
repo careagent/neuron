@@ -18,6 +18,10 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - ✓ Implements ProtocolServer interface from provider-core — Phase 4
 - ✓ mDNS/DNS-SD local network discovery (_careagent-neuron._tcp) — Phase 5
 - ✓ Same consent verification for local and remote connections — Phase 5 (DISC-04 by design)
+- ✓ HTTP REST API on Node.js built-in http module — Phase 6
+- ✓ API key authentication with rate limiting — Phase 6
+- ✓ Organization, relationship, status routes — Phase 6
+- ✓ OpenAPI 3.1 specification — Phase 6
 
 ### Active
 
@@ -37,10 +41,6 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - [ ] Provider-initiated termination with state protocol compliance
 - [ ] Terminated relationships permanently stop routing
 - [ ] Bidirectional session bridge between patient and provider
-- [ ] HTTP REST API on Node.js built-in http module
-- [ ] API key authentication with rate limiting
-- [ ] Organization, relationship, status routes
-- [ ] OpenAPI 3.1 specification
 - [ ] Patient Chart sync receiver with authorization check
 - [ ] Incremental sync with last-sync-timestamp tracking
 - [ ] Access revocation: purge cached entries
@@ -112,6 +112,9 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 | mDNS/DNS-SD for local discovery (v1) | BLE/NFC deferred due to platform-specific complexity | Phase 5 |
 | bonjour-service for mDNS | Pure JS, no native deps; RFC 6763 compliant TXT records | Phase 5 |
 | Discovery stops first in shutdown | Goodbye packets sent before WebSocket close for clean LAN deregistration | Phase 5 |
+| nrn_ prefixed API keys with SHA-256 hashing | Keys identifiable in logs; only hash stored for breach protection | Phase 6 |
+| REST router reuses Phase 4 HTTP server | One port for WS + REST; router ignores non-/v1 paths to avoid WS conflict | Phase 6 |
+| Read-only REST API in v1 | All endpoints GET; API key management via CLI only | Phase 6 |
 
 ---
-*Last updated: 2026-02-22 after Phase 5*
+*Last updated: 2026-02-22 after Phase 6*
