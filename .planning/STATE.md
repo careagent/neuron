@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 2 of 9 (Axon Registration)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: Executing Phase 2
-Last activity: 2026-02-22 -- Completed 02-01-PLAN.md (data model foundation and mock Axon)
+Last activity: 2026-02-22 -- Completed 02-03-PLAN.md (IPC communication layer)
 
-Progress: [██░░░░░░░░] 19%
+Progress: [███░░░░░░░] 25%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 3min
-- Total execution time: 0.05 hours
+- Total plans completed: 2
+- Average duration: 2.5min
+- Total execution time: 0.08 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 02-axon-registration | 1 | 3min | 3min |
+| 02-axon-registration | 2 | 5min | 2.5min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (3min)
-- Trend: Starting phase 2
+- Last 5 plans: 02-01 (3min), 02-03 (2min)
+- Trend: Accelerating
 
 *Updated after each plan completion*
 
@@ -48,6 +48,10 @@ Recent decisions affecting current work:
 - [02-01]: Single-row enforcement via CHECK(id=1) constraint on neuron_registration table
 - [02-01]: Mock Axon uses in-memory Map state, fresh per run for test reliability
 - [02-01]: Mock server outputs ready signal on stdout for test harness integration
+- [02-03]: NDJSON protocol (one JSON object per newline) for Unix socket IPC
+- [02-03]: Socket path co-located with database file via getSocketPath(storagePath)
+- [02-03]: 5-second client timeout with descriptive error messages
+- [02-03]: Stale socket cleanup via unlinkSync before server.listen
 
 ### Pending Todos
 
@@ -62,5 +66,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 02-01-PLAN.md (data model foundation and mock Axon)
+Stopped at: Completed 02-03-PLAN.md (IPC communication layer)
 Resume file: None
