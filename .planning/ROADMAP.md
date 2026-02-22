@@ -88,12 +88,13 @@ Plans:
   3. Per-provider concurrency limits are enforced; the 11th simultaneous connection to a provider with limit 10 is rejected with a clear error
   4. When either side disconnects, the session is cleaned up gracefully (all listeners removed, both sockets closed, session tracking updated)
   5. The Neuron satisfies the `ProtocolServer` interface from provider-core (`start`, `stop`, `activeSessions`)
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [ ] 04-01-PLAN.md — Routing types and schemas (config extension, ProtocolServer interface, handshake messages, error types)
 - [ ] 04-02-PLAN.md — WebSocket server and handshake handler (NeuronProtocolServer, safety ceiling, connection handler)
 - [ ] 04-03-PLAN.md — CLI wiring and integration tests (start command lifecycle, comprehensive WebSocket tests)
+- [ ] 04-04-PLAN.md — Gap closure: update ROADMAP SC-2/SC-3, add missing audit event, remove dead test code
 
 ### Phase 5: Local Discovery
 **Goal**: CareAgents on the local network can discover the Neuron via mDNS/DNS-SD and connect with the same consent-verified flow as remote connections
