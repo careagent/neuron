@@ -10,6 +10,7 @@ import { AxonRegistrationService } from '../../registration/index.js'
 import { RelationshipStore, TerminationHandler, ConsentHandshakeHandler } from '../../relationships/index.js'
 import { NeuronProtocolServer, createConnectionHandler } from '../../routing/index.js'
 import { DiscoveryService } from '../../discovery/index.js'
+import { ApiKeyStore, TokenBucketRateLimiter, createApiRouter } from '../../api/index.js'
 import type { IpcCommand, IpcResponse } from '../../ipc/index.js'
 import { output } from '../output.js'
 
@@ -127,6 +128,15 @@ export function registerStartCommand(program: Command): void {
                 return { ok: false, error: (err as Error).message }
               }
             }
+            case 'shutdown': {
+              auditLogger?.append({
+                category: 'admin',
+                action: 'neuron_stop',
+              })
+              // Schedule shutdown after response flushes over the socket
+              setTimeout(() => void shutdown(), 100)
+              return { ok: true, data: { message: 'Shutting down' } }
+            }
             default:
               return { ok: false, error: 'Unknown command' }
           }
@@ -166,6 +176,32 @@ export function registerStartCommand(program: Command): void {
       protocolServer.setConnectionHandler(connectionHandler)
       await protocolServer.start(config.server.port)
       output.info(`WebSocket server listening on port ${config.server.port} at ${config.websocket.path}`)
+
+      // 6a. Wire REST API router to HTTP server
+      const apiKeyStore = new ApiKeyStore(storage)
+      const rateLimiter = new TokenBucketRateLimiter(
+        config.api.rateLimit.maxRequests,
+        config.api.rateLimit.maxRequests, // refill = max (full refill each window)
+        config.api.rateLimit.windowMs,
+      )
+
+      const apiRouter = createApiRouter({
+        config,
+        storage,
+        apiKeyStore,
+        rateLimiter,
+        relationshipStore,
+        registrationService,
+        protocolServer,
+      })
+
+      // Attach to existing HTTP server (from NeuronProtocolServer)
+      // HTTP 'request' events are for regular HTTP requests
+      // HTTP 'upgrade' events are handled by WebSocket (already wired in protocolServer.start)
+      const httpServer = protocolServer.server!
+      httpServer.on('request', apiRouter)
+
+      output.info(`REST API active on port ${config.server.port} (/v1/*)`)
 
       // 6b. Start local network discovery (if enabled)
       let discoveryService: DiscoveryService | null = null

@@ -9,6 +9,7 @@ import { registerStopCommand } from './commands/stop.js'
 import { registerStatusCommand } from './commands/status.js'
 import { registerProviderCommand } from './commands/provider.js'
 import { registerDiscoverCommand } from './commands/discover.js'
+import { registerApiKeyCommand } from './commands/api-key.js'
 
 // Mock IPC and registration modules for Phase 2 tests
 vi.mock('../ipc/index.js', () => ({
@@ -38,7 +39,7 @@ vi.mock('../routing/index.js', () => {
     this.setOnSessionEnd = vi.fn()
     this.notifySessionEnd = vi.fn()
     this.port = null
-    this.server = null
+    this.server = { on: vi.fn() }
   })
   return {
     NeuronProtocolServer: MockNeuronProtocolServer,
@@ -52,6 +53,28 @@ vi.mock('../discovery/index.js', () => ({
     stop: vi.fn().mockResolvedValue(undefined),
   })),
 }))
+
+vi.mock('../api/index.js', () => {
+  const MockApiKeyStore = vi.fn(function (this: Record<string, unknown>) {
+    this.create = vi.fn().mockReturnValue({
+      keyId: 'test-key-id',
+      raw: 'nrn_test-raw-key',
+      name: 'test-key',
+      createdAt: '2026-01-01T00:00:00.000Z',
+    })
+    this.revoke = vi.fn()
+    this.list = vi.fn().mockReturnValue([])
+  })
+  return {
+    ApiKeyStore: MockApiKeyStore,
+    TokenBucketRateLimiter: vi.fn(function (this: Record<string, unknown>) {
+      this.consume = vi.fn().mockReturnValue(true)
+      this.retryAfter = vi.fn().mockReturnValue(0)
+      this.cleanup = vi.fn()
+    }),
+    createApiRouter: vi.fn().mockReturnValue(vi.fn()),
+  }
+})
 
 vi.mock('../registration/index.js', () => {
   const MockAxonRegistrationService = vi.fn(function (this: Record<string, unknown>) {
@@ -101,6 +124,7 @@ describe('CLI', () => {
     registerStatusCommand(program)
     registerProviderCommand(program)
     registerDiscoverCommand(program)
+    registerApiKeyCommand(program)
     return program
   }
 
@@ -142,7 +166,7 @@ describe('CLI', () => {
   }
 
   describe('help output', () => {
-    it('should list all commands in help including provider and discover', () => {
+    it('should list all commands in help including provider, discover, and api-key', () => {
       const program = createProgram()
       const help = program.helpInformation()
       expect(help).toContain('init')
@@ -151,6 +175,7 @@ describe('CLI', () => {
       expect(help).toContain('status')
       expect(help).toContain('provider')
       expect(help).toContain('discover')
+      expect(help).toContain('api-key')
     })
   })
 
@@ -524,6 +549,177 @@ describe('CLI', () => {
       expect(allOutput).toContain('registered')
       expect(allOutput).toContain('reg-123')
       expect(allOutput).toContain('healthy')
+    })
+  })
+
+  describe('stop command', () => {
+    it('should send shutdown IPC command', async () => {
+      const { sendIpcCommand } = await import('../ipc/index.js')
+      vi.mocked(sendIpcCommand).mockResolvedValue({ ok: true, data: { message: 'Shutting down' } })
+
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'stop', '--config', join(tempDir, 'nonexistent.json')])
+
+      await vi.waitFor(() => {
+        expect(sendIpcCommand).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ type: 'shutdown' }),
+        )
+      })
+
+      const calls = stdoutSpy.mock.calls.map((c) => c[0])
+      expect(calls.some((c) => typeof c === 'string' && c.includes('Neuron stopped'))).toBe(true)
+    })
+
+    it('should show "not running" when server is not running', async () => {
+      const { sendIpcCommand } = await import('../ipc/index.js')
+      vi.mocked(sendIpcCommand).mockRejectedValue(
+        new Error('Neuron is not running (socket not found)'),
+      )
+
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'stop', '--config', join(tempDir, 'nonexistent.json')])
+
+      await vi.waitFor(() => {
+        expect(sendIpcCommand).toHaveBeenCalled()
+      })
+
+      const calls = stdoutSpy.mock.calls.map((c) => c[0])
+      expect(calls.some((c) => typeof c === 'string' && c.includes('Neuron is not running'))).toBe(true)
+      // Idempotent stop — should NOT exit with error
+      expect(exitSpy).not.toHaveBeenCalledWith(1)
+    })
+
+    it('should handle server error', async () => {
+      const { sendIpcCommand } = await import('../ipc/index.js')
+      vi.mocked(sendIpcCommand).mockResolvedValue({ ok: false, error: 'Shutdown failed' })
+
+      const stderrSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'stop', '--config', join(tempDir, 'nonexistent.json')])
+
+      await vi.waitFor(() => {
+        expect(exitSpy).toHaveBeenCalledWith(1)
+      })
+
+      const calls = stderrSpy.mock.calls.map((c) => c[0])
+      expect(calls.some((c) => typeof c === 'string' && c.includes('Shutdown failed'))).toBe(true)
+    })
+  })
+
+  describe('api-key commands', () => {
+    it('should list api-key in help output', () => {
+      const program = createProgram()
+      const help = program.helpInformation()
+      expect(help).toContain('api-key')
+    })
+
+    it('should create an API key and display the raw key', async () => {
+      const { configPath } = writeValidConfig(tempDir)
+
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+      const stderrSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'api-key', 'create', '--name', 'my-key', '--config', configPath])
+
+      await vi.waitFor(() => {
+        const calls = stdoutSpy.mock.calls.map((c) => c[0])
+        expect(calls.some((c) => typeof c === 'string' && c.includes('API key created'))).toBe(true)
+      })
+
+      const allStdout = stdoutSpy.mock.calls.map((c) => c[0]).filter((c): c is string => typeof c === 'string').join('')
+      expect(allStdout).toContain('Key ID:')
+      expect(allStdout).toContain('API Key:')
+
+      // Warning should be shown
+      const allStderr = stderrSpy.mock.calls.map((c) => c[0]).filter((c): c is string => typeof c === 'string').join('')
+      expect(allStderr).toContain('Save this key now')
+    })
+
+    it('should revoke an API key', async () => {
+      const { configPath } = writeValidConfig(tempDir)
+
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'api-key', 'revoke', 'some-key-id', '--config', configPath])
+
+      await vi.waitFor(() => {
+        const calls = stdoutSpy.mock.calls.map((c) => c[0])
+        expect(calls.some((c) => typeof c === 'string' && c.includes('some-key-id') && c.includes('revoked'))).toBe(true)
+      })
+    })
+
+    it('should list API keys with no keys', async () => {
+      const { configPath } = writeValidConfig(tempDir)
+
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'api-key', 'list', '--config', configPath])
+
+      await vi.waitFor(() => {
+        const calls = stdoutSpy.mock.calls.map((c) => c[0])
+        expect(calls.some((c) => typeof c === 'string' && c.includes('No API keys'))).toBe(true)
+      })
+    })
+
+    it('should list API keys with entries', async () => {
+      const { configPath } = writeValidConfig(tempDir)
+
+      // Override mock to return keys for this test
+      const { ApiKeyStore } = await import('../api/index.js')
+      vi.mocked(ApiKeyStore).mockImplementation(function (this: Record<string, unknown>) {
+        this.create = vi.fn()
+        this.revoke = vi.fn()
+        this.list = vi.fn().mockReturnValue([
+          {
+            key_id: 'key-abc',
+            name: 'production',
+            created_at: '2026-01-01T00:00:00.000Z',
+            revoked_at: null,
+            last_used_at: '2026-02-01T00:00:00.000Z',
+          },
+          {
+            key_id: 'key-xyz',
+            name: 'staging',
+            created_at: '2026-01-01T00:00:00.000Z',
+            revoked_at: '2026-02-15T00:00:00.000Z',
+            last_used_at: null,
+          },
+        ])
+        return this as never
+      })
+
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'api-key', 'list', '--config', configPath])
+
+      await vi.waitFor(() => {
+        const calls = stdoutSpy.mock.calls.map((c) => c[0])
+        expect(calls.some((c) => typeof c === 'string' && c.includes('key-abc'))).toBe(true)
+      })
+
+      const allOutput = stdoutSpy.mock.calls.map((c) => c[0]).filter((c): c is string => typeof c === 'string').join('')
+      expect(allOutput).toContain('production')
+      expect(allOutput).toContain('[active]')
+      expect(allOutput).toContain('key-xyz')
+      expect(allOutput).toContain('staging')
+      expect(allOutput).toContain('REVOKED')
     })
   })
 })

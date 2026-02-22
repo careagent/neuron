@@ -12,6 +12,7 @@ export const IpcCommandSchema = Type.Union([
     provider_npi: Type.String(),
     reason: Type.String(),
   }),
+  Type.Object({ type: Type.Literal('shutdown') }),
 ])
 
 export type IpcCommand = Static<typeof IpcCommandSchema>
