@@ -193,6 +193,7 @@ export function registerStartCommand(program: Command): void {
         relationshipStore,
         registrationService,
         protocolServer,
+        auditLogger,
       })
 
       // Attach to existing HTTP server (from NeuronProtocolServer)
