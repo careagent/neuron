@@ -16,6 +16,8 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - ✓ Connection authentication: consent → relationship check → route — Phase 4
 - ✓ Active session tracking with per-provider concurrency limits — Phase 4 (global handshake ceiling with queuing)
 - ✓ Implements ProtocolServer interface from provider-core — Phase 4
+- ✓ mDNS/DNS-SD local network discovery (_careagent-neuron._tcp) — Phase 5
+- ✓ Same consent verification for local and remote connections — Phase 5 (DISC-04 by design)
 
 ### Active
 
@@ -35,8 +37,6 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - [ ] Provider-initiated termination with state protocol compliance
 - [ ] Terminated relationships permanently stop routing
 - [ ] Bidirectional session bridge between patient and provider
-- [ ] mDNS/DNS-SD local network discovery (_careagent-neuron._tcp)
-- [ ] Same consent verification for local and remote connections
 - [ ] Appointment CRUD with full status lifecycle
 - [ ] Provider availability management (recurring, one-time, blocks)
 - [ ] Billing record CRUD with CPT/ICD codes
@@ -112,7 +112,9 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 | ws in noServer mode for WebSocket | Shares HTTP server with Phase 7 REST API; one port for all traffic | Phase 4 |
 | Broker-and-step-out model (not relay bridge) | Neuron completes address exchange and closes; no persistent relay | Phase 4 |
 | Global handshake ceiling with queuing | Connections queued, never rejected; queue timeout for graceful degradation | Phase 4 |
-| mDNS/DNS-SD for local discovery (v1) | BLE/NFC deferred due to platform-specific complexity | — Pending |
+| mDNS/DNS-SD for local discovery (v1) | BLE/NFC deferred due to platform-specific complexity | Phase 5 |
+| bonjour-service for mDNS | Pure JS, no native deps; RFC 6763 compliant TXT records | Phase 5 |
+| Discovery stops first in shutdown | Goodbye packets sent before WebSocket close for clean LAN deregistration | Phase 5 |
 
 ---
-*Last updated: 2026-02-22 after Phase 4*
+*Last updated: 2026-02-22 after Phase 5*

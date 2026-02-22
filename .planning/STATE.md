@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Every NPI-holding organization can connect to the CareAgent network through a free, secure organizational boundary that routes patient connections, verifies consent, and never holds clinical data.
-**Current focus:** Phase 5: Local Discovery
+**Current focus:** Phase 6: Scheduling and Billing
 
 ## Current Position
 
-Phase: 5 of 9 (Local Discovery)
-Plan: 2 of 2 complete
-Status: Phase complete
-Last activity: 2026-02-22 -- Phase 5 complete, ready for transition
+Phase: 6 of 9 (Scheduling and Billing)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-02-22 -- Phase 5 complete, transitioning to Phase 6
 
 Progress: [█████████████████████] 17/17 plans (100% of planned so far)
 
@@ -111,5 +111,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 05-02-PLAN.md (Phase 5 complete)
+Stopped at: Phase 5 complete, ready to plan Phase 6 (Scheduling and Billing)
 Resume file: None
