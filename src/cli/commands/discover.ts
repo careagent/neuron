@@ -6,7 +6,7 @@
  */
 
 import type { Command } from 'commander'
-import Bonjour from 'bonjour-service'
+import { Bonjour } from 'bonjour-service'
 import { output } from '../output.js'
 
 export function registerDiscoverCommand(program: Command): void {

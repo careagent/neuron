@@ -11,7 +11,7 @@
  *   ep  — Full WebSocket endpoint URL
  */
 
-import Bonjour, { type Service } from 'bonjour-service'
+import { Bonjour, type Service } from 'bonjour-service'
 import type { DiscoveryConfig } from './types.js'
 
 export class DiscoveryService {

@@ -25,6 +25,7 @@ const { mockPublish, mockUnpublishAll, mockDestroy, MockBonjour } = vi.hoisted((
 
 vi.mock('bonjour-service', () => ({
   default: MockBonjour,
+  Bonjour: MockBonjour,
 }))
 
 describe('DiscoveryService', () => {
