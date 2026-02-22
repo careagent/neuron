@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Every NPI-holding organization can connect to the CareAgent network through a free, secure organizational boundary that routes patient connections, verifies consent, and never holds clinical data.
-**Current focus:** Phase 3: Consent and Relationships (In Progress)
+**Current focus:** Phase 3: Consent and Relationships (Complete)
 
 ## Current Position
 
-Phase: 3 of 9 (Consent and Relationships) -- IN PROGRESS
-Plan: 2 of 3 in current phase (2 complete)
-Status: Executing Phase 3
-Last activity: 2026-02-22 -- Completed 03-02-PLAN.md (relationship store and consent handshake)
+Phase: 3 of 9 (Consent and Relationships) -- COMPLETE
+Plan: 3 of 3 in current phase (3 complete)
+Status: Phase 3 Complete
+Last activity: 2026-02-22 -- Completed 03-03-PLAN.md (relationship termination and IPC wiring)
 
-Progress: [██████░░░░] 46%
+Progress: [██████░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 3min
-- Total execution time: 0.28 hours
+- Total plans completed: 7
+- Average duration: 2.7min
+- Total execution time: 0.32 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 02-axon-registration | 4 | 12min | 3min |
-| 03-consent-and-relationships | 2 | 5min | 2.5min |
+| 03-consent-and-relationships | 3 | 7min | 2.3min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (4min), 02-04 (3min), 03-01 (2min), 03-02 (3min)
+- Last 5 plans: 02-04 (3min), 03-01 (2min), 03-02 (3min), 03-03 (2min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -68,6 +68,9 @@ Recent decisions affecting current work:
 - [03-02]: Hard cap of 1000 pending challenges to prevent memory exhaustion
 - [03-02]: Terminated status transitions rejected at store level (TERM-04 enforcement)
 - [03-02]: Audit event logged on relationship establishment with category 'consent'
+- [03-03]: Direct SQL update inside transaction bypasses RelationshipStore.updateStatus to avoid double-validation
+- [03-03]: Audit entry logged before mutation to capture sequence number for termination record linkage
+- [03-03]: TerminationHandler uses own try/catch in IPC case for clean error messages
 
 ### Pending Todos
 
@@ -82,5 +85,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 03-02-PLAN.md (relationship store and consent handshake)
+Stopped at: Completed 03-03-PLAN.md (relationship termination and IPC wiring) -- Phase 3 complete
 Resume file: None

@@ -48,10 +48,10 @@
 
 ### Relationship Termination (TERM)
 
-- [ ] **TERM-01**: Provider-initiated termination following state protocol requirements
-- [ ] **TERM-02**: Terminated relationships permanently stop routing (no reactivation)
-- [ ] **TERM-03**: TerminationRecord persistence with audit trail linkage
-- [ ] **TERM-04**: Terminated = permanent; new relationship requires fresh handshake
+- [x] **TERM-01**: Provider-initiated termination following state protocol requirements
+- [x] **TERM-02**: Terminated relationships permanently stop routing (no reactivation)
+- [x] **TERM-03**: TerminationRecord persistence with audit trail linkage
+- [x] **TERM-04**: Terminated = permanent; new relationship requires fresh handshake
 
 ### Connection Routing (ROUT)
 
@@ -179,10 +179,10 @@
 | RELN-02 | Phase 3 | Complete |
 | RELN-03 | Phase 3 | Complete |
 | RELN-04 | Phase 3 | Complete |
-| TERM-01 | Phase 3 | Pending |
-| TERM-02 | Phase 3 | Pending |
-| TERM-03 | Phase 3 | Pending |
-| TERM-04 | Phase 3 | Pending |
+| TERM-01 | Phase 3 | Complete |
+| TERM-02 | Phase 3 | Complete |
+| TERM-03 | Phase 3 | Complete |
+| TERM-04 | Phase 3 | Complete |
 | ROUT-01 | Phase 4 | Pending |
 | ROUT-02 | Phase 4 | Pending |
 | ROUT-03 | Phase 4 | Pending |
