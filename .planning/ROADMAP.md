@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Local Discovery** - mDNS/DNS-SD advertisement for local network CareAgent connections (completed 2026-02-22)
 - [x] **Phase 6: REST API** - Third-party HTTP API with auth, rate limiting, CORS, and OpenAPI spec (completed 2026-02-22)
 - [x] **Phase 7: Integration and Documentation** - E2E tests across all functionalities and reference documentation (2026-02-22)
-- [ ] **Phase 8: Foundation Tech Debt** - Wire neuron stop, add missing audit producers, add audit verification CLI command (gap closure)
+- [x] **Phase 8: Foundation Tech Debt** - Wire neuron stop, add missing audit producers, add audit verification CLI command (gap closure) (completed 2026-02-22)
 
 ## Phase Details
 
@@ -153,8 +153,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — IPC shutdown command, stop CLI rewrite, and api_access audit events
-- [ ] 08-02-PLAN.md — verify-audit CLI command
+- [x] 08-01-PLAN.md — IPC shutdown command, stop CLI rewrite, and api_access audit events (2026-02-22)
+- [x] 08-02-PLAN.md — verify-audit CLI command (2026-02-22)
 
 ## Progress
 
@@ -170,4 +170,4 @@ Phases execute in numeric order: 1 through 8. Phase 8 (gap closure) depends on P
 | 5. Local Discovery | 2/2 | Complete | 2026-02-22 |
 | 6. REST API | 3/3 | Complete | 2026-02-22 |
 | 7. Integration and Documentation | 3/3 | Complete | 2026-02-22 |
-| 8. Foundation Tech Debt | 0/2 | Not started | - |
+| 8. Foundation Tech Debt | 2/2 | Complete | 2026-02-22 |

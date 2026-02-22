@@ -5,38 +5,40 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Every NPI-holding organization can connect to the CareAgent network through a free, secure organizational boundary that routes patient connections, verifies consent, and never holds clinical data.
-**Current focus:** Phase 8: Foundation Tech Debt
+**Current focus:** Milestone v1.0 complete
 
 ## Current Position
 
-Phase: 8 of 8 (Foundation Tech Debt)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-02-22 -- Phase 7 complete: 3/3 plans, 17 E2E tests, 3 documentation files, all SC verified
+Phase: 8 of 8 (Foundation Tech Debt) -- COMPLETE
+Plan: All plans complete
+Status: Milestone v1.0 complete
+Last activity: 2026-02-22 -- Phase 8 complete: 2/2 plans, all 3 SCs verified, 239 tests pass
 
-Progress: [██████████████████████████] 23/23 plans (100% of planned so far)
+Progress: [██████████████████████████] 25/25 plans (100%)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
+- Total plans completed: 25
 - Average duration: 3.0min
-- Total execution time: 0.95 hours
+- Total execution time: ~1.1 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
+| 01-foundation | 4 | 12min | 3min |
 | 02-axon-registration | 4 | 12min | 3min |
 | 03-consent-and-relationships | 3 | 7min | 2.3min |
 | 04-websocket-routing | 4 | 10min | 2.5min |
 | 05-local-discovery | 2 | 8min | 4min |
 | 06-rest-api | 3 | 18min | 6min |
 | 07-integration-and-documentation | 3 | 8min | 2.7min |
+| 08-foundation-tech-debt | 2 | 7min | 3.5min |
 
 **Recent Trend:**
-- Last 5 plans: 06-03 (6min), 07-01 (3min), 07-03 (3min), 07-02 (2min)
-- Trend: Accelerating (harness reuse speeds up)
+- Last 5 plans: 07-02 (2min), 07-03 (3min), 08-01 (4min), 08-02 (3min)
+- Trend: Consistent ~3min/plan
 
 *Updated after each plan completion*
 
@@ -54,6 +56,9 @@ Recent decisions affecting current work:
 - [07-02]: Rate limit test creates fresh API key per test to avoid interference
 - [07-03]: Documentation extracted from actual source code, not written from memory
 - [07-03]: AI-agent optimized formatting: consistent heading hierarchy, tables, Mermaid diagrams
+- [08-01]: Shutdown uses setTimeout delay to flush IPC response before process.exit
+- [08-01]: api_access audit events placed inline in router pipeline (not middleware)
+- [08-02]: AuditLogger mock uses function syntax for constructor compatibility in tests
 
 ### Pending Todos
 
@@ -68,5 +73,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Phase 7 complete, ready to plan Phase 8 (Foundation Tech Debt)
+Stopped at: Phase 8 complete, all v1.0 milestone phases done (8/8)
 Resume file: N/A
