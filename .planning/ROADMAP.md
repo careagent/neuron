@@ -150,10 +150,11 @@ Plans:
   1. `neuron stop` sends a shutdown signal via IPC to a running Neuron process and it exits cleanly
   2. Audit events are emitted for all 6 categories defined in the schema (registration, connection, consent, api_access, admin, termination) — the 2 missing categories (connection, api_access) have producers wired at their natural trigger points
   3. `neuron verify-audit` CLI command runs `verifyAuditChain()` and reports chain integrity status
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: TBD
+- [ ] 08-01-PLAN.md — IPC shutdown command, stop CLI rewrite, and api_access audit events
+- [ ] 08-02-PLAN.md — verify-audit CLI command
 
 ## Progress
 
@@ -169,4 +170,4 @@ Phases execute in numeric order: 1 through 8. Phase 8 (gap closure) depends on P
 | 5. Local Discovery | 2/2 | Complete | 2026-02-22 |
 | 6. REST API | 3/3 | Complete | 2026-02-22 |
 | 7. Integration and Documentation | 3/3 | Complete | 2026-02-22 |
-| 8. Foundation Tech Debt | 0/1 | Not started | - |
+| 8. Foundation Tech Debt | 0/2 | Not started | - |
