@@ -28,6 +28,8 @@ export const NeuronConfigSchema = Type.Object({
   }),
   localNetwork: Type.Object({
     enabled: Type.Boolean({ default: false }),
+    serviceType: Type.String({ default: 'careagent-neuron' }),
+    protocolVersion: Type.String({ default: 'v1.0' }),
   }),
   heartbeat: Type.Object({
     intervalMs: Type.Number({ minimum: 1000, default: 60000 }),

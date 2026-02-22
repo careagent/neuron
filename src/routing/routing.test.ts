@@ -138,7 +138,7 @@ describe('WebSocket Routing Integration', () => {
     },
     storage: { path: ':memory:' },
     audit: { path: '', enabled: true },
-    localNetwork: { enabled: false },
+    localNetwork: { enabled: false, serviceType: 'careagent-neuron', protocolVersion: 'v1.0' },
     heartbeat: { intervalMs: 60000 },
     axon: {
       registryUrl: 'http://localhost:9999',

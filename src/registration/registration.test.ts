@@ -82,7 +82,7 @@ function createTestConfig(overrides?: Partial<NeuronConfig>): NeuronConfig {
     server: { port: 3000, host: '0.0.0.0' },
     storage: { path: join(tempDir, 'neuron.db') },
     audit: { path: join(tempDir, 'audit.jsonl'), enabled: true },
-    localNetwork: { enabled: false },
+    localNetwork: { enabled: false, serviceType: 'careagent-neuron', protocolVersion: 'v1.0' },
     heartbeat: { intervalMs: 60000 },
     axon: {
       registryUrl: MOCK_BASE,
@@ -522,7 +522,7 @@ describe('AxonRegistrationService', () => {
       server: { port: 3000, host: '0.0.0.0' },
       storage: { path: join(tempDir, 'neuron.db') },
       audit: { path: join(tempDir, 'audit.jsonl'), enabled: true },
-      localNetwork: { enabled: false },
+      localNetwork: { enabled: false, serviceType: 'careagent-neuron', protocolVersion: 'v1.0' },
       heartbeat: { intervalMs: 60000 },
       axon: {
         registryUrl: MOCK_BASE,

@@ -25,6 +25,8 @@ export const DEFAULT_CONFIG: Omit<NeuronConfig, 'organization'> & {
   },
   localNetwork: {
     enabled: false,
+    serviceType: 'careagent-neuron',
+    protocolVersion: 'v1.0',
   },
   heartbeat: {
     intervalMs: 60000,

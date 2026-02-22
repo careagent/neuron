@@ -115,7 +115,7 @@ describe('CLI', () => {
         server: { port: 3000, host: '0.0.0.0' },
         storage: { path: dbPath },
         audit: { path: auditPath, enabled: true },
-        localNetwork: { enabled: false },
+        localNetwork: { enabled: false, serviceType: 'careagent-neuron', protocolVersion: 'v1.0' },
         heartbeat: { intervalMs: 60000 },
         axon: {
           registryUrl: 'http://localhost:9999',
@@ -256,7 +256,7 @@ describe('CLI', () => {
           server: { port: 3000, host: '0.0.0.0' },
           storage: { path: join(tempDir, 'data', 'neuron.db') },
           audit: { path: join(tempDir, 'data', 'audit.jsonl'), enabled: true },
-          localNetwork: { enabled: false },
+          localNetwork: { enabled: false, serviceType: 'careagent-neuron', protocolVersion: 'v1.0' },
           heartbeat: { intervalMs: 60000 },
         }),
       )
@@ -307,7 +307,7 @@ describe('CLI', () => {
           server: { port: 3000, host: '0.0.0.0' },
           storage: { path: dbPath },
           audit: { path: auditPath, enabled: true },
-          localNetwork: { enabled: false },
+          localNetwork: { enabled: false, serviceType: 'careagent-neuron', protocolVersion: 'v1.0' },
           heartbeat: { intervalMs: 60000 },
           axon: {
             registryUrl: 'http://localhost:9999',
