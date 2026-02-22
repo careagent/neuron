@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 4 of 9 (WebSocket Routing)
-Plan: 1 of 3 in current phase (1 complete)
+Plan: 2 of 3 in current phase (2 complete)
 Status: Executing Phase 4
-Last activity: 2026-02-22 -- Completed 04-01-PLAN.md (routing types and schemas)
+Last activity: 2026-02-22 -- Completed 04-02-PLAN.md (WebSocket routing server and handler)
 
-Progress: [██████░░░░] 53%
+Progress: [██████░░░░] 59%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 2.6min
-- Total execution time: 0.35 hours
+- Total plans completed: 9
+- Average duration: 2.7min
+- Total execution time: 0.4 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [██████░░░░] 53%
 |-------|-------|-------|----------|
 | 02-axon-registration | 4 | 12min | 3min |
 | 03-consent-and-relationships | 3 | 7min | 2.3min |
-| 04-websocket-routing | 1 | 2min | 2min |
+| 04-websocket-routing | 2 | 5min | 2.5min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (2min), 03-02 (3min), 03-03 (2min), 04-01 (2min)
+- Last 5 plans: 03-02 (3min), 03-03 (2min), 04-01 (2min), 04-02 (3min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -76,6 +76,12 @@ Recent decisions affecting current work:
 - [04-01]: Messages use typed JSON envelopes with discriminant type field for dispatch
 - [04-01]: InboundHandshakeMessage union covers auth and challenge_response (patient-to-Neuron only)
 - [04-01]: HandshakeComplete status field distinguishes new vs existing relationships
+- [04-02]: ws library in noServer mode attached to node:http server for Phase 7 REST API port sharing
+- [04-02]: Safety ceiling queues connections (never rejects) with configurable queue timeout
+- [04-02]: Existing active relationships return existing relationship_id without creating duplicate
+- [04-02]: Early consent token verification extracts provider_npi before challenge-response (stateless re-verify per CSNT-02)
+- [04-02]: Binary frames rejected -- text-only JSON envelopes for handshake protocol
+- [04-02]: ConsentError codes mapped to RoutingErrorCode: INVALID_SIGNATURE/CONSENT_EXPIRED -> CONSENT_FAILED, MALFORMED_TOKEN -> INVALID_MESSAGE
 
 ### Pending Todos
 
@@ -90,5 +96,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 04-01-PLAN.md (routing types and schemas)
+Stopped at: Completed 04-02-PLAN.md (WebSocket routing server and handler)
 Resume file: None
