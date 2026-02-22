@@ -55,12 +55,12 @@
 
 ### Connection Routing (ROUT)
 
-- [ ] **ROUT-01**: WebSocket server accepting inbound patient CareAgent connections
+- [x] **ROUT-01**: WebSocket server accepting inbound patient CareAgent connections
 - [ ] **ROUT-02**: Connection authentication pipeline: consent token → relationship check → route
-- [ ] **ROUT-03**: Bidirectional session bridge between patient and provider WebSocket connections with backpressure handling
-- [ ] **ROUT-04**: Active session tracking with per-provider concurrency limits (configurable, default 10)
+- [x] **ROUT-03**: Bidirectional session bridge between patient and provider WebSocket connections with backpressure handling
+- [x] **ROUT-04**: Active session tracking with per-provider concurrency limits (configurable, default 10)
 - [ ] **ROUT-05**: Graceful session termination from either side with cleanup
-- [ ] **ROUT-06**: Implements `ProtocolServer` interface from provider-core (start, stop, activeSessions)
+- [x] **ROUT-06**: Implements `ProtocolServer` interface from provider-core (start, stop, activeSessions)
 
 ### Local Network Discovery (DISC)
 
@@ -183,12 +183,12 @@
 | TERM-02 | Phase 3 | Complete |
 | TERM-03 | Phase 3 | Complete |
 | TERM-04 | Phase 3 | Complete |
-| ROUT-01 | Phase 4 | Pending |
+| ROUT-01 | Phase 4 | Complete |
 | ROUT-02 | Phase 4 | Pending |
-| ROUT-03 | Phase 4 | Pending |
-| ROUT-04 | Phase 4 | Pending |
+| ROUT-03 | Phase 4 | Complete |
+| ROUT-04 | Phase 4 | Complete |
 | ROUT-05 | Phase 4 | Pending |
-| ROUT-06 | Phase 4 | Pending |
+| ROUT-06 | Phase 4 | Complete |
 | DISC-01 | Phase 5 | Pending |
 | DISC-02 | Phase 5 | Pending |
 | DISC-03 | Phase 5 | Pending |

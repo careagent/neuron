@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Every NPI-holding organization can connect to the CareAgent network through a free, secure organizational boundary that routes patient connections, verifies consent, and never holds clinical data.
-**Current focus:** Phase 3: Consent and Relationships (Complete)
+**Current focus:** Phase 4: WebSocket Routing (In Progress)
 
 ## Current Position
 
-Phase: 3 of 9 (Consent and Relationships) -- COMPLETE
-Plan: 3 of 3 in current phase (3 complete)
-Status: Phase 3 Complete
-Last activity: 2026-02-22 -- Completed 03-03-PLAN.md (relationship termination and IPC wiring)
+Phase: 4 of 9 (WebSocket Routing)
+Plan: 1 of 3 in current phase (1 complete)
+Status: Executing Phase 4
+Last activity: 2026-02-22 -- Completed 04-01-PLAN.md (routing types and schemas)
 
-Progress: [██████░░░░] 50%
+Progress: [██████░░░░] 53%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 2.7min
-- Total execution time: 0.32 hours
+- Total plans completed: 8
+- Average duration: 2.6min
+- Total execution time: 0.35 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [██████░░░░] 50%
 |-------|-------|-------|----------|
 | 02-axon-registration | 4 | 12min | 3min |
 | 03-consent-and-relationships | 3 | 7min | 2.3min |
+| 04-websocket-routing | 1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 02-04 (3min), 03-01 (2min), 03-02 (3min), 03-03 (2min)
+- Last 5 plans: 03-01 (2min), 03-02 (3min), 03-03 (2min), 04-01 (2min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -71,6 +72,10 @@ Recent decisions affecting current work:
 - [03-03]: Direct SQL update inside transaction bypasses RelationshipStore.updateStatus to avoid double-validation
 - [03-03]: Audit entry logged before mutation to capture sequence number for termination record linkage
 - [03-03]: TerminationHandler uses own try/catch in IPC case for clean error messages
+- [04-01]: HandshakeSession excludes WebSocket reference -- ws field managed internally by server (Plan 02)
+- [04-01]: Messages use typed JSON envelopes with discriminant type field for dispatch
+- [04-01]: InboundHandshakeMessage union covers auth and challenge_response (patient-to-Neuron only)
+- [04-01]: HandshakeComplete status field distinguishes new vs existing relationships
 
 ### Pending Todos
 
@@ -80,10 +85,10 @@ None yet.
 
 - ~~Ed25519 key format must be defined canonically before Phase 3 implementation~~ RESOLVED: base64url-encoded raw 32-byte keys, imported via JWK format (03-01)
 - Axon registry API does not exist yet; Phase 2 mock must be built from Axon PRD contract
-- ProtocolServer interface shape from provider-core needs validation before Phase 4
+- ~~ProtocolServer interface shape from provider-core needs validation before Phase 4~~ RESOLVED: ProtocolServer/ProtocolSession interfaces defined in src/routing/types.ts (04-01)
 
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 03-03-PLAN.md (relationship termination and IPC wiring) -- Phase 3 complete
+Stopped at: Completed 04-01-PLAN.md (routing types and schemas)
 Resume file: None
