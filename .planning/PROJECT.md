@@ -12,7 +12,10 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ WebSocket server for inbound patient CareAgent connections — Phase 4
+- ✓ Connection authentication: consent → relationship check → route — Phase 4
+- ✓ Active session tracking with per-provider concurrency limits — Phase 4 (global handshake ceiling with queuing)
+- ✓ Implements ProtocolServer interface from provider-core — Phase 4
 
 ### Active
 
@@ -31,11 +34,7 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - [ ] Relationship queries by patient, provider, relationship ID
 - [ ] Provider-initiated termination with state protocol compliance
 - [ ] Terminated relationships permanently stop routing
-- [ ] WebSocket server for inbound patient CareAgent connections
-- [ ] Connection authentication: consent → relationship check → route
 - [ ] Bidirectional session bridge between patient and provider
-- [ ] Active session tracking with per-provider concurrency limits
-- [ ] Implements ProtocolServer interface from provider-core
 - [ ] mDNS/DNS-SD local network discovery (_careagent-neuron._tcp)
 - [ ] Same consent verification for local and remote connections
 - [ ] Appointment CRUD with full status lifecycle
@@ -110,7 +109,10 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 | relationship_id only for scheduling/billing | Keeps Neuron outside HIPAA covered entity classification | — Pending |
 | Node.js built-in http (no framework) | Consistency with ecosystem; minimal deps | — Pending |
 | Hash-chained JSONL audit log | Tamper-evident operational audit trail | — Pending |
+| ws in noServer mode for WebSocket | Shares HTTP server with Phase 7 REST API; one port for all traffic | Phase 4 |
+| Broker-and-step-out model (not relay bridge) | Neuron completes address exchange and closes; no persistent relay | Phase 4 |
+| Global handshake ceiling with queuing | Connections queued, never rejected; queue timeout for graceful degradation | Phase 4 |
 | mDNS/DNS-SD for local discovery (v1) | BLE/NFC deferred due to platform-specific complexity | — Pending |
 
 ---
-*Last updated: 2026-02-21 after initialization*
+*Last updated: 2026-02-22 after Phase 4*
