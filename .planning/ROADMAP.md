@@ -55,7 +55,7 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Registration data model (TypeBox schemas, config extension, SQLite migration v2) and mock Axon server
+- [x] 02-01-PLAN.md — Registration data model (TypeBox schemas, config extension, SQLite migration v2) and mock Axon server
 - [ ] 02-02-PLAN.md — AxonClient HTTP wrapper, RegistrationStateStore, HeartbeatManager, and AxonRegistrationService
 - [ ] 02-03-PLAN.md — IPC layer (Unix domain socket server, client, protocol schemas)
 - [ ] 02-04-PLAN.md — Provider CLI commands and neuron start/status integration wiring
@@ -176,7 +176,7 @@ Phases execute in numeric order: 1 through 9. Phase 6 depends only on Phase 3 (n
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete | 2026-02-21 |
-| 2. Axon Registration | 0/4 | Not started | - |
+| 2. Axon Registration | 1/4 | In progress | - |
 | 3. Consent and Relationships | 0/3 | Not started | - |
 | 4. WebSocket Routing | 0/2 | Not started | - |
 | 5. Local Discovery | 0/1 | Not started | - |
