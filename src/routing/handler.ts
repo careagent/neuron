@@ -182,6 +182,18 @@ export function createConnectionHandler(deps: HandlerDeps): (ws: WebSocket, requ
         } else {
           sendError(ws, 'SERVER_ERROR', 'Internal server error')
         }
+        if (auditLogger) {
+          auditLogger.append({
+            category: 'connection',
+            action: 'connection.handshake_failed',
+            actor: authMsg.patient_agent_id,
+            details: {
+              session_id: session.id,
+              error: err instanceof Error ? err.message : 'Unknown error',
+              provider_npi: 'unknown',
+            },
+          })
+        }
         ws.close(4003, 'Consent verification failed')
         return
       }

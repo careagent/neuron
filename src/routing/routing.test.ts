@@ -494,15 +494,6 @@ describe('WebSocket Routing Integration', () => {
     expect(session).toBeDefined()
     expect(session!.status).toBe('active')
 
-    // Complete handshake
-    const challenge = await new Promise<Record<string, unknown>>((resolve) => {
-      // We already got the challenge above, so re-read from stored message
-      // Actually, we need to get the nonce. The handler already sent the challenge.
-      // Since we consumed it above, we need to use the nonce from the challenge message.
-      // Let me restructure: the challenge was already received in the line above.
-      resolve({}) // Placeholder; we'll sign with the nonce from the ws1 challenge
-    })
-
     // Close connection to clean up
     ws.close()
     await waitForClose(ws)
@@ -606,14 +597,8 @@ describe('WebSocket Routing Integration', () => {
     expect(error.code).toBe('CONSENT_FAILED')
     await waitForClose(ws)
 
-    // Note: The early consent verification failure in handleAuthMessage doesn't
-    // emit a handshake_failed event (only the challenge_response failure path does).
-    // However, the handshake_started event should still be emitted.
     await new Promise((r) => setTimeout(r, 50))
 
-    // Since early verification fails before challenge, no handshake_started is emitted either
-    // (the handler sends handshake_started only after parsing auth message successfully,
-    // which happens before consent verification). Let me verify:
     const { readFileSync } = await import('node:fs')
     const auditPath = join(tempDir, 'audit.jsonl')
     const lines = readFileSync(auditPath, 'utf-8').trim().split('\n')
@@ -625,5 +610,12 @@ describe('WebSocket Routing Integration', () => {
         (e as Record<string, unknown>).actor === 'patient-fail-audit',
     )
     expect(started).toBeDefined()
+
+    // handshake_failed should be emitted for early consent verification failure
+    const failed = entries.find(
+      (e) => e.action === 'connection.handshake_failed' &&
+        (e as Record<string, unknown>).actor === 'patient-fail-audit',
+    )
+    expect(failed).toBeDefined()
   })
 })
