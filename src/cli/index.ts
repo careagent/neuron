@@ -5,6 +5,7 @@ import { registerStartCommand } from './commands/start.js'
 import { registerStopCommand } from './commands/stop.js'
 import { registerStatusCommand } from './commands/status.js'
 import { registerProviderCommand } from './commands/provider.js'
+import { registerDiscoverCommand } from './commands/discover.js'
 
 const program = new Command()
 
@@ -18,6 +19,7 @@ registerStartCommand(program)
 registerStopCommand(program)
 registerStatusCommand(program)
 registerProviderCommand(program)
+registerDiscoverCommand(program)
 
 export { program }
 
