@@ -6,6 +6,7 @@ import { SqliteStorage } from '../../storage/index.js'
 import { AuditLogger } from '../../audit/index.js'
 import { startIpcServer, getSocketPath, type IpcHandler } from '../../ipc/index.js'
 import { AxonRegistrationService } from '../../registration/index.js'
+import { RelationshipStore, TerminationHandler } from '../../relationships/index.js'
 import type { IpcCommand, IpcResponse } from '../../ipc/index.js'
 import { output } from '../output.js'
 
@@ -68,6 +69,10 @@ export function registerStartCommand(program: Command): void {
         auditLogger,
       )
 
+      // Relationship services for termination via IPC
+      const relationshipStore = new RelationshipStore(storage)
+      const terminationHandler = new TerminationHandler(storage, relationshipStore, auditLogger)
+
       const ipcHandler: IpcHandler = async (command: IpcCommand): Promise<IpcResponse> => {
         try {
           switch (command.type) {
@@ -93,6 +98,14 @@ export function registerStartCommand(program: Command): void {
             case 'status': {
               const status = registrationService.getStatus()
               return { ok: true, data: status }
+            }
+            case 'relationship.terminate': {
+              try {
+                terminationHandler.terminate(command.relationship_id, command.provider_npi, command.reason)
+                return { ok: true, data: { terminated: true, relationship_id: command.relationship_id } }
+              } catch (err) {
+                return { ok: false, error: (err as Error).message }
+              }
             }
             default:
               return { ok: false, error: 'Unknown command' }

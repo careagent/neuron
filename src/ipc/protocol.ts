@@ -6,6 +6,12 @@ export const IpcCommandSchema = Type.Union([
   Type.Object({ type: Type.Literal('provider.remove'), npi: Type.String() }),
   Type.Object({ type: Type.Literal('provider.list') }),
   Type.Object({ type: Type.Literal('status') }),
+  Type.Object({
+    type: Type.Literal('relationship.terminate'),
+    relationship_id: Type.String(),
+    provider_npi: Type.String(),
+    reason: Type.String(),
+  }),
 ])
 
 export type IpcCommand = Static<typeof IpcCommandSchema>
