@@ -70,12 +70,12 @@ Plans:
   3. Relationships can be queried by patient agent ID, provider NPI, relationship ID, and status
   4. A provider-initiated termination permanently stops routing for that relationship; attempting to connect on a terminated relationship fails
   5. A terminated relationship cannot be reactivated; establishing care again requires a completely new consent handshake
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md — Ed25519 consent token verification (TDD) and RelationshipRecord schema update
+- [ ] 03-02-PLAN.md — RelationshipStore CRUD/queries and ConsentHandshakeHandler
+- [ ] 03-03-PLAN.md — TerminationHandler with transactional safety and IPC integration
 
 ### Phase 4: WebSocket Routing
 **Goal**: Patient CareAgents can connect to provider CareAgents through the Neuron with verified consent, bidirectional message flow, and resource-safe session management
@@ -177,7 +177,7 @@ Phases execute in numeric order: 1 through 9. Phase 6 depends only on Phase 3 (n
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete | 2026-02-21 |
 | 2. Axon Registration | 1/4 | In progress | - |
-| 3. Consent and Relationships | 0/3 | Not started | - |
+| 3. Consent and Relationships | 0/3 | Planned | - |
 | 4. WebSocket Routing | 0/2 | Not started | - |
 | 5. Local Discovery | 0/1 | Not started | - |
 | 6. Scheduling and Billing | 0/2 | Not started | - |
