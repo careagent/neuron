@@ -1,27 +1,31 @@
 /**
- * TDD tests for DiscoveryService — mDNS/DNS-SD advertisement lifecycle.
+ * TDD tests for DiscoveryService -- mDNS/DNS-SD advertisement lifecycle.
  *
  * Mocks bonjour-service at module level to verify publish/unpublish/destroy
  * calls without actual network activity.
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-
-const mockPublish = vi.fn()
-const mockUnpublishAll = vi.fn((cb: () => void) => cb())
-const mockDestroy = vi.fn()
-
-vi.mock('bonjour-service', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    publish: mockPublish,
-    unpublishAll: mockUnpublishAll,
-    destroy: mockDestroy,
-  })),
-}))
-
-import Bonjour from 'bonjour-service'
 import { DiscoveryService } from './service.js'
 import type { DiscoveryConfig } from './types.js'
+
+const { mockPublish, mockUnpublishAll, mockDestroy, MockBonjour } = vi.hoisted(() => {
+  const mockPublish = vi.fn()
+  const mockUnpublishAll = vi.fn((cb: () => void) => cb())
+  const mockDestroy = vi.fn()
+
+  const MockBonjour = vi.fn(function (this: Record<string, unknown>) {
+    this.publish = mockPublish
+    this.unpublishAll = mockUnpublishAll
+    this.destroy = mockDestroy
+  })
+
+  return { mockPublish, mockUnpublishAll, mockDestroy, MockBonjour }
+})
+
+vi.mock('bonjour-service', () => ({
+  default: MockBonjour,
+}))
 
 describe('DiscoveryService', () => {
   const defaultConfig: DiscoveryConfig = {
@@ -42,7 +46,7 @@ describe('DiscoveryService', () => {
       const service = new DiscoveryService(defaultConfig)
       await service.start()
 
-      expect(Bonjour).toHaveBeenCalledOnce()
+      expect(MockBonjour).toHaveBeenCalledOnce()
       expect(mockPublish).toHaveBeenCalledOnce()
       expect(mockPublish).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -68,7 +72,7 @@ describe('DiscoveryService', () => {
       const service = new DiscoveryService({ ...defaultConfig, enabled: false })
       await service.start()
 
-      expect(Bonjour).not.toHaveBeenCalled()
+      expect(MockBonjour).not.toHaveBeenCalled()
       expect(mockPublish).not.toHaveBeenCalled()
     })
 
