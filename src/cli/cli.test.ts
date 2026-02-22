@@ -20,6 +20,31 @@ vi.mock('../ipc/index.js', () => ({
   sendIpcCommand: vi.fn(),
 }))
 
+vi.mock('../routing/index.js', () => {
+  const MockNeuronProtocolServer = vi.fn(function (this: Record<string, unknown>) {
+    this.start = vi.fn().mockResolvedValue(undefined)
+    this.stop = vi.fn().mockResolvedValue(undefined)
+    this.activeSessions = vi.fn().mockReturnValue([])
+    this.getSessionManager = vi.fn().mockReturnValue({
+      create: vi.fn(),
+      get: vi.fn(),
+      remove: vi.fn(),
+      all: vi.fn().mockReturnValue([]),
+      clear: vi.fn(),
+      size: 0,
+    })
+    this.setConnectionHandler = vi.fn()
+    this.setOnSessionEnd = vi.fn()
+    this.notifySessionEnd = vi.fn()
+    this.port = null
+    this.server = null
+  })
+  return {
+    NeuronProtocolServer: MockNeuronProtocolServer,
+    createConnectionHandler: vi.fn().mockReturnValue(vi.fn()),
+  }
+})
+
 vi.mock('../registration/index.js', () => {
   const MockAxonRegistrationService = vi.fn(function (this: Record<string, unknown>) {
     this.start = vi.fn().mockResolvedValue(undefined)

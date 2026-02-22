@@ -6,7 +6,8 @@ import { SqliteStorage } from '../../storage/index.js'
 import { AuditLogger } from '../../audit/index.js'
 import { startIpcServer, getSocketPath, type IpcHandler } from '../../ipc/index.js'
 import { AxonRegistrationService } from '../../registration/index.js'
-import { RelationshipStore, TerminationHandler } from '../../relationships/index.js'
+import { RelationshipStore, TerminationHandler, ConsentHandshakeHandler } from '../../relationships/index.js'
+import { NeuronProtocolServer, createConnectionHandler } from '../../routing/index.js'
 import type { IpcCommand, IpcResponse } from '../../ipc/index.js'
 import { output } from '../output.js'
 
@@ -118,7 +119,36 @@ export function registerStartCommand(program: Command): void {
       const ipcServer = startIpcServer(socketPath, ipcHandler)
       output.info(`IPC server listening: ${socketPath}`)
 
-      // 6. Start Axon registration
+      // 6. Start WebSocket protocol server
+      const handshakeHandler = new ConsentHandshakeHandler(
+        relationshipStore,
+        config.organization.npi,
+        auditLogger,
+      )
+
+      const protocolServer = new NeuronProtocolServer(
+        config,
+        handshakeHandler,
+        relationshipStore,
+        auditLogger,
+      )
+
+      const connectionHandler = createConnectionHandler({
+        config,
+        handshakeHandler,
+        relationshipStore,
+        sessionManager: protocolServer.getSessionManager(),
+        organizationNpi: config.organization.npi,
+        neuronEndpointUrl: config.axon.endpointUrl,
+        auditLogger,
+        onSessionEnd: () => protocolServer.notifySessionEnd(),
+      })
+
+      protocolServer.setConnectionHandler(connectionHandler)
+      await protocolServer.start(config.server.port)
+      output.info(`WebSocket server listening on port ${config.server.port} at ${config.websocket.path}`)
+
+      // 7. Start Axon registration
       try {
         await registrationService.start()
         const status = registrationService.getStatus()
@@ -131,15 +161,22 @@ export function registerStartCommand(program: Command): void {
         output.warn('Axon unreachable — running in degraded mode, will retry')
       }
 
-      // 7. Report ready
+      // 8. Report ready
       output.success(`Neuron started for ${config.organization.name} (NPI: ${config.organization.npi})`)
 
-      // 8. Keep alive
+      // 9. Keep alive
       const keepAlive = setInterval(() => {}, config.heartbeat.intervalMs)
 
-      // 9. Clean shutdown on signals
+      // 10. Clean shutdown on signals
       const shutdown = async () => {
         clearInterval(keepAlive)
+
+        // Stop WebSocket server first (closes all active handshake connections)
+        try {
+          await protocolServer.stop()
+        } catch {
+          // Ignore stop errors during shutdown
+        }
 
         // Stop registration service (stops heartbeat)
         try {
