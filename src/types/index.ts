@@ -10,6 +10,18 @@ export {
 export { NeuronConfigSchema } from './config.js'
 export type { NeuronConfig } from './config.js'
 
+// Registration
+export {
+  NeuronRegistrationStateSchema,
+  NeuronRegistrationStatus,
+  ProviderRegistrationSchema,
+  ProviderRegistrationStatus,
+} from './registration.js'
+export type {
+  NeuronRegistrationState,
+  ProviderRegistration,
+} from './registration.js'
+
 // Relationships
 export { RelationshipRecordSchema, RelationshipStatus } from './relationship.js'
 export type { RelationshipRecord } from './relationship.js'

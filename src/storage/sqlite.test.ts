@@ -35,6 +35,8 @@ describe('SqliteStorage', () => {
       expect(tables).toContain('termination_records')
       expect(tables).toContain('cached_chart_entries')
       expect(tables).toContain('sync_state')
+      expect(tables).toContain('neuron_registration')
+      expect(tables).toContain('provider_registrations')
     })
 
     it('should be idempotent (calling initialize() twice does not error)', () => {
@@ -58,7 +60,7 @@ describe('SqliteStorage', () => {
     it('should record migration version', () => {
       storage.initialize()
       const row = storage.get<{ version: number }>('SELECT MAX(version) as version FROM schema_version')
-      expect(row?.version).toBe(1)
+      expect(row?.version).toBe(2)
     })
   })
 

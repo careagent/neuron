@@ -25,6 +25,11 @@ export const NeuronConfigSchema = Type.Object({
   heartbeat: Type.Object({
     intervalMs: Type.Number({ minimum: 1000, default: 60000 }),
   }),
+  axon: Type.Object({
+    registryUrl: Type.String({ default: 'http://localhost:9999' }),
+    endpointUrl: Type.String({ default: 'http://localhost:3000' }),
+    backoffCeilingMs: Type.Number({ minimum: 1000, default: 300000 }),
+  }),
 })
 
 export type NeuronConfig = Static<typeof NeuronConfigSchema>

@@ -99,6 +99,35 @@ export const migrations: Migration[] = [
       );
     `,
   },
+  {
+    version: 2,
+    description: 'Create registration tables: neuron_registration, provider_registrations',
+    up: `
+      CREATE TABLE IF NOT EXISTS neuron_registration (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        organization_npi TEXT NOT NULL,
+        organization_name TEXT NOT NULL,
+        organization_type TEXT NOT NULL,
+        axon_registry_url TEXT NOT NULL,
+        neuron_endpoint_url TEXT NOT NULL,
+        registration_id TEXT,
+        axon_bearer_token TEXT,
+        status TEXT NOT NULL DEFAULT 'unregistered',
+        first_registered_at TEXT,
+        last_heartbeat_at TEXT,
+        last_axon_response_at TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS provider_registrations (
+        provider_npi TEXT PRIMARY KEY,
+        axon_provider_id TEXT,
+        registration_status TEXT NOT NULL DEFAULT 'pending',
+        first_registered_at TEXT,
+        last_heartbeat_at TEXT,
+        last_axon_response_at TEXT
+      );
+    `,
+  },
 ]
 
 /**

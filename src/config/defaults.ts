@@ -22,4 +22,9 @@ export const DEFAULT_CONFIG: Omit<NeuronConfig, 'organization'> & {
   heartbeat: {
     intervalMs: 60000,
   },
+  axon: {
+    registryUrl: 'http://localhost:9999',
+    endpointUrl: 'http://localhost:3000',
+    backoffCeilingMs: 300000,
+  },
 }
