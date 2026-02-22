@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Every NPI-holding organization can connect to the CareAgent network through a free, secure organizational boundary that routes patient connections, verifies consent, and never holds clinical data.
-**Current focus:** Phase 4: WebSocket Routing (In Progress)
+**Current focus:** Phase 4: WebSocket Routing (Complete)
 
 ## Current Position
 
 Phase: 4 of 9 (WebSocket Routing)
-Plan: 2 of 3 in current phase (2 complete)
-Status: Executing Phase 4
-Last activity: 2026-02-22 -- Completed 04-02-PLAN.md (WebSocket routing server and handler)
+Plan: 3 of 3 in current phase (3 complete)
+Status: Phase 4 Complete
+Last activity: 2026-02-22 -- Completed 04-03-PLAN.md (CLI wiring and integration tests)
 
-Progress: [██████░░░░] 59%
+Progress: [██████░░░░] 63%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 2.7min
-- Total execution time: 0.4 hours
+- Total execution time: 0.45 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [██████░░░░] 59%
 |-------|-------|-------|----------|
 | 02-axon-registration | 4 | 12min | 3min |
 | 03-consent-and-relationships | 3 | 7min | 2.3min |
-| 04-websocket-routing | 2 | 5min | 2.5min |
+| 04-websocket-routing | 3 | 8min | 2.7min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (3min), 03-03 (2min), 04-01 (2min), 04-02 (3min)
+- Last 5 plans: 03-03 (2min), 04-01 (2min), 04-02 (3min), 04-03 (3min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -82,6 +82,10 @@ Recent decisions affecting current work:
 - [04-02]: Early consent token verification extracts provider_npi before challenge-response (stateless re-verify per CSNT-02)
 - [04-02]: Binary frames rejected -- text-only JSON envelopes for handshake protocol
 - [04-02]: ConsentError codes mapped to RoutingErrorCode: INVALID_SIGNATURE/CONSENT_EXPIRED -> CONSENT_FAILED, MALFORMED_TOKEN -> INVALID_MESSAGE
+- [04-03]: WebSocket server starts after IPC server, before Axon registration in the start command lifecycle
+- [04-03]: protocolServer.stop() is first in shutdown pipeline (before registration, IPC, storage)
+- [04-03]: CLI tests mock routing module to prevent port conflicts during unit testing
+- [04-03]: Integration tests use ephemeral port (0) and real WebSocket connections for end-to-end verification
 
 ### Pending Todos
 
@@ -96,5 +100,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 04-02-PLAN.md (WebSocket routing server and handler)
+Stopped at: Completed 04-03-PLAN.md (CLI wiring and integration tests) -- Phase 4 complete
 Resume file: None
