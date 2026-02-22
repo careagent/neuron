@@ -88,11 +88,12 @@ Plans:
   3. Per-provider concurrency limits are enforced; the 11th simultaneous connection to a provider with limit 10 is rejected with a clear error
   4. When either side disconnects, the session is cleaned up gracefully (all listeners removed, both sockets closed, session tracking updated)
   5. The Neuron satisfies the `ProtocolServer` interface from provider-core (`start`, `stop`, `activeSessions`)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — Routing types and schemas (config extension, ProtocolServer interface, handshake messages, error types)
+- [ ] 04-02-PLAN.md — WebSocket server and handshake handler (NeuronProtocolServer, safety ceiling, connection handler)
+- [ ] 04-03-PLAN.md — CLI wiring and integration tests (start command lifecycle, comprehensive WebSocket tests)
 
 ### Phase 5: Local Discovery
 **Goal**: CareAgents on the local network can discover the Neuron via mDNS/DNS-SD and connect with the same consent-verified flow as remote connections
@@ -193,7 +194,7 @@ Phases execute in numeric order: 1 through 10. Phase 6 depends only on Phase 3 (
 | 1. Foundation | 4/4 | Complete | 2026-02-21 |
 | 2. Axon Registration | 1/4 | In progress | - |
 | 3. Consent and Relationships | 0/3 | Complete    | 2026-02-22 |
-| 4. WebSocket Routing | 0/2 | Not started | - |
+| 4. WebSocket Routing | 0/3 | Not started | - |
 | 5. Local Discovery | 0/1 | Not started | - |
 | 6. Scheduling and Billing | 0/2 | Not started | - |
 | 7. REST API | 0/2 | Not started | - |
