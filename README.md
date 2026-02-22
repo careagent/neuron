@@ -1,276 +1,138 @@
-# neuron# careagent/neuron
+# @careagent/neuron
 
-**The organization-level Axon node — free, open-source, for any NPI-holding organization.**
+The organization-level trust anchor for the CareAgent network. Free, open-source infrastructure for any NPI-holding healthcare organization.
 
-The Neuron is a lightweight application that serves as the public-facing endpoint for any organization that participates in patient care: medical practices, hospitals, pharmacies, imaging centers, laboratories, urgent care facilities, specialty clinics, and any other NPI-holding entity.
+## Why
 
-It is the organizational membrane between the national Axon network and the individual provider CareAgents operating behind it. Provider CareAgents are never exposed directly to the national network. They sit behind the Neuron, which manages all inbound and outbound connections on their behalf.
+Every healthcare organization needs a way for patient CareAgents to establish consent and connect with provider CareAgents. The Neuron handles the one-time consent handshake — verifying the patient's consent token, creating the relationship record, exchanging direct addresses between patient and provider CareAgents — then steps out. All clinical communication flows peer-to-peer after the handshake. No PHI ever touches the Neuron.
 
----
+The Neuron is free. Charging for organizational infrastructure would exclude the small practices and rural clinics that need it most.
 
-## The Neuron Is Free
+## What It Does
 
-The Neuron is free of charge to any NPI-holding organization. This is non-negotiable.
+- **Trust brokering** — Accepts inbound WebSocket connections from patient CareAgents, verifies Ed25519 consent tokens, creates relationship records, exchanges direct P2P addresses between patient and provider CareAgents, then disconnects
+- **Patient directory** — Stores patient CareAgent identifiers, demographics, and consent records for consented relationships (never PHI)
+- **Axon registration** — Registers the organization and its providers with the national Axon network using NPI as the universal identifier
+- **API gateway** — Exposes a REST API for third-party applications (scheduling tools, billing systems, documentation tools, pharmacy agents) to reach consented patient CareAgents directly
+- **Local discovery** — mDNS/DNS-SD advertisement for patient CareAgents on the local network
+- **Audit trail** — Hash-chained JSONL log for every operational event (consent, registration, termination)
 
-Charging for the organizational endpoint would exclude exactly the organizations that most need this infrastructure — small independent practices, rural clinics, community pharmacies, safety net hospitals. The organizations serving the most vulnerable patients are the ones with the least IT budget.
+## What It Does Not Do
 
-The Neuron is infrastructure. Not a product. Its economics are sustained by the ecosystem it enables, not by access fees.
+- Store or transit clinical data (diagnoses, lab results, prescriptions, treatment notes)
+- Relay messages between CareAgents after the handshake
+- House scheduling or billing data (third-party apps handle this through the API)
+- Stay in the communication path after consent establishment
+- Replace an EMR
 
----
+## Architecture
 
-## The Biological Metaphor
-
-In the CareAgent ecosystem:
-
-- **CareAgents** are the individual cellular intelligence — each provider and patient has their own sovereign brain.
-- **Axon** is the open foundation network connecting nodes nationally.
-- **The Neuron** is the organizational node — the boundary unit that connects the national network to the individual CareAgents behind it.
-
-Just as a biological neuron is the organizational unit of the nervous system, the Neuron is the organizational unit of the CareAgent network. Signals arrive from the Axon network, are processed at the Neuron, and are routed to the appropriate CareAgent behind it.
-
----
-
-## What the Neuron Does
-
-### National Registration
-Registers the organization and its providers with the national Axon network using the NPI as the universal identifier. Any NPI-holding provider at the organization is discoverable nationally through Axon once registered with the Neuron.
-
-### Patient CareAgent Routing
-Routes incoming patient CareAgent connections to the correct provider CareAgent based on the established relationship record. The Neuron knows which patients have relationships with which providers. It does not hold clinical data — only routing information.
-
-### Local Network Discovery
-When a patient is physically present at the organization, their CareAgent can discover and connect to the Neuron over the local network — WiFi, Bluetooth, or NFC depending on proximity. No national Axon infrastructure is involved. This is the highest trust state: physical presence plus local network plus cryptographic identity verification.
-
-### Consent Verification
-Verifies that a care relationship and valid consent exist before routing any connection to a provider CareAgent. No connection is established without a verified relationship record.
-
-### Relationship Registration
-Records new care relationships when established through the consent handshake. Stores routing information only — never clinical data.
-
-### Scheduling and Billing Data Layer
-The lightweight organizational data store for scheduling and billing information. This is the provider's minimal "EMR" — not a clinical data warehouse, but the operational data needed to run a practice:
-
-- Appointment scheduling
-- Billing and claims data
-- CPT/ICD coding records
-- Provider availability and coverage
-
-Clinical data lives with the patient. The Neuron holds only what the organization needs to operate.
-
-### Third-Party API
-Exposes a well-documented local API for third-party applications to interact with the CareAgent ecosystem. Practice management tools, billing systems, scheduling interfaces, and stripped-down clinical workflow applications all connect through this API. Third-party tools never communicate directly with the national Axon network or with individual CareAgents — they communicate with the Neuron.
-
-### Authorized Patient Chart Sync Endpoint
-Receives Patient Chart updates from patient CareAgents for organizations that have been granted authorized read access by patients. Acts as a sync endpoint for live record propagation.
-
-### Relationship Termination Handling
-Manages state-protocol-compliant provider-initiated care relationship termination. When a provider terminates a care relationship following the applicable state protocol, the Neuron:
-
-- Coordinates the termination event with the provider's CareAgent
-- Stops routing that patient's CareAgent connections to the provider
-- Maintains the audit record of the termination
-
-The termination event is written to the patient's immutable Patient Chart by the provider's credentialed CareAgent. The Neuron does not write to the Patient Chart — only the provider's CareAgent does.
-
----
-
-## Applicability
-
-The Neuron architecture applies to any NPI-holding organization:
-
-| Organization Type | Neuron Function |
-|------------------|----------------|
-| Medical practice | Routes patient connections to provider CareAgents; scheduling and billing |
-| Hospital | Routes to department or provider CareAgents; institutional scheduling and billing |
-| Pharmacy | Receives prescription communications; delivers dispensing confirmations |
-| Imaging center | Delivers imaging results to patient Patient Charts |
-| Laboratory | Delivers lab results to patient Patient Charts |
-| Urgent care | Handles episodic relationship establishment and documentation |
-| Specialty clinic | Routes to specialist CareAgents; specialty scheduling and billing |
-
-Every organization that touches a patient's care has an NPI. Every NPI-holding organization can run a Neuron.
-
----
-
-## Resilience and Local-First Operation
-
-The Neuron operates independently of national Axon connectivity for established relationships. If the national Axon network is unreachable:
-
-- Established relationships stored in the Neuron's routing store allow patient CareAgent connections to proceed normally
-- The local network discovery mechanism continues to function for physically present patients
-- All events are logged locally and sync with the national Axon layer when connectivity restores
-
-New relationship discovery through the national registry is unavailable during outages. Established care continues without interruption.
-
----
-
-## The Neuron API and SDK
-
-The Neuron is the integration surface for the entire third-party developer ecosystem. Third-party applications never communicate directly with Axon or with individual CareAgents — they communicate with the Neuron. This is by design. Axon is a closed protocol layer. The Neuron is the intentional, hardened boundary between the CareAgent network and everything outside it.
-
-The Neuron exposes two integration surfaces:
-
-**The Neuron API** — a REST API for local application integration. Practice management tools, billing systems, scheduling interfaces, and specialty workflow applications query this API to interact with the CareAgent ecosystem. Clinical data is not held by these tools — they query it through the API when needed and write back through the credentialed access the Neuron manages.
-
-**The Neuron SDK** — a TypeScript client library for building applications on top of the Neuron API. The SDK is the primary resource for third-party developers building on the CareAgent ecosystem. It abstracts the Neuron API surface, handles authentication, and provides typed interfaces for all Neuron operations.
-
-```bash
-pnpm add @careagent/neuron-sdk
+```
+                    Axon Network
+                         |
+                      Neuron          <-- trust broker, steps out after handshake
+                    /    |    \
+          Third-party  Patient    Provider
+             Apps     CareAgent   CareAgent
+                         \         /
+                      Direct P2P after consent
 ```
 
-The barrier to entry for building clinical tools drops from tens of millions of dollars to the cost of understanding the Neuron SDK and building a clean interface.
+The Neuron is the organization's membrane to the Axon network. Patient CareAgents connect once to establish consent. After the handshake, everyone knows how to reach everyone else — patient CareAgent talks directly to provider CareAgent, third-party apps reach patient CareAgents directly — until the patient revokes consent or the organization bans the patient.
 
-See `docs/api.md` for the full API reference and `docs/sdk.md` for the SDK documentation.
+Any NPI-holding organization can run a Neuron: medical practices, hospitals, pharmacies, imaging centers, laboratories, urgent care facilities, specialty clinics.
 
----
-
-## Installation
-
-### Requirements
-
-- A valid NPI for the organization or individual provider
-- A server or local machine to host the Neuron (on-premise or cloud)
-- Network accessibility for patient CareAgent connections (internet) and local network discovery (LAN)
-
-### Install
-
-This project uses [pnpm](https://pnpm.io) as its package manager.
+## Install
 
 ```bash
-# Install pnpm if you don't have it
-npm install -g pnpm
-
-# Clone and install dependencies
 git clone https://github.com/careagent/neuron
 cd neuron
 pnpm install
-
-# Build
 pnpm build
 ```
 
-### Initialize
+## Usage
 
 ```bash
+# Initialize and register with Axon
 neuron init
-```
 
-The initialization process registers the organization with the national Axon network, configures provider CareAgent routing, sets up the local network discovery endpoint, and initializes the scheduling and billing data layer.
-
-### Start
-
-```bash
+# Start the Neuron
 neuron start
-```
 
-### Status
+# Manage providers
+neuron provider add <npi>
+neuron provider list
+neuron provider remove <npi>
 
-```bash
+# Check status
 neuron status
 ```
 
----
-
-## Configuration
-
-The Neuron is configured through `neuron.config.json`:
-
-```json
-{
-  "organization": {
-    "name": "Example Medical Practice",
-    "npi": "1234567890",
-    "type": "practice"
-  },
-  "axon": {
-    "registry": "https://registry.axon.careagent.org",
-    "endpoint": "https://neuron.example.com"
-  },
-  "localNetwork": {
-    "enabled": true,
-    "discovery": ["wifi", "bluetooth"]
-  },
-  "providers": [
-    {
-      "agentId": "dr-smith",
-      "npi": "0987654321",
-      "endpoint": "ws://localhost:4000/agents/dr-smith"
-    }
-  ],
-  "api": {
-    "port": 3000,
-    "allowedOrigins": ["http://localhost:8080"]
-  }
-}
-```
-
----
-
-## Local Development
+## Development
 
 ```bash
-# Run in development mode
-pnpm dev
-
-# Run tests
-pnpm test
-
-# Run with mock patient connections
-pnpm dev:mock
+pnpm dev          # Run in development mode
+pnpm test         # Run tests
+pnpm test:watch   # Watch mode
+pnpm test:coverage # Coverage report
+pnpm lint         # Type check
 ```
 
-> **Dev platform note:** All development uses synthetic data and mock patient CareAgent connections. No real patient data or PHI is used at this stage.
+All development uses synthetic data. No real patient data or PHI at any stage.
 
----
-
-## Repository Structure
+## Project Structure
 
 ```
-careagent/neuron/
-├── src/
-│   ├── index.ts              # Neuron entry point
-│   ├── registration/         # National Axon registration and credential management
-│   ├── routing/              # Patient CareAgent routing to provider CareAgents
-│   ├── discovery/            # Local network discovery endpoint
-│   ├── consent/              # Consent verification before routing
-│   ├── relationships/        # Relationship registration and routing store
-│   ├── scheduling/           # Scheduling and billing data layer
-│   ├── api/                  # Third-party local API
-│   ├── sync/                 # Authorized Patient Chart sync endpoint
-│   └── termination/          # State-protocol-compliant relationship termination
-├── test/                     # Test suites
-├── docs/
-│   ├── api.md                # Full third-party API reference
-│   ├── architecture.md       # Neuron architecture guide
-│   └── configuration.md      # Full configuration reference
-├── neuron.config.json        # Default configuration template
-└── package.json              # pnpm package
+src/
+├── index.ts            # Package entry point
+├── audit/              # Hash-chained JSONL audit logging
+├── cli/                # CLI commands (init, start, stop, status, provider)
+├── config/             # TypeBox config schema, loader, env overrides
+├── consent/            # Ed25519 token verification, challenge-response
+├── ipc/                # Unix domain socket IPC (CLI ↔ server)
+├── registration/       # Axon registration, heartbeat, state persistence
+├── relationships/      # Relationship store, handshake handler, termination
+├── storage/            # SQLite engine with migrations
+├── types/              # TypeBox schemas for all data models
+└── validators/         # NPI Luhn validation
 ```
 
----
+## Tech Stack
 
-## Contributing
+| Layer | Choice |
+|-------|--------|
+| Runtime | Node.js >=20.19.0 |
+| Language | TypeScript ~5.7.x |
+| Build | tsdown ~0.20.x |
+| Test | vitest ~4.0.x (80% coverage) |
+| Schema | @sinclair/typebox ~0.34.x |
+| HTTP | Node.js built-in `http` module |
+| Storage | SQLite via better-sqlite3 |
+| CLI | Commander |
+| License | Apache 2.0 |
 
-CareAgent is released under Apache 2.0. Contributions are welcome from clinicians, developers, health IT professionals, and anyone committed to building trustworthy clinical AI infrastructure.
+## Roadmap
 
-Before contributing, read the architecture guide in `docs/architecture.md` and the contribution guidelines in `CONTRIBUTING.md`.
-
----
+- [x] Phase 1: Foundation (config, audit, storage, types, CLI, NPI validation)
+- [ ] Phase 2: Axon Registration (organization/provider registration, heartbeat)
+- [x] Phase 3: Consent and Relationships (Ed25519 verification, relationship store, termination)
+- [ ] Phase 4: WebSocket Routing (consent handshake, address exchange, broker-and-step-out)
+- [ ] Phase 5: Local Discovery (mDNS/DNS-SD)
+- [ ] Phase 6: Scheduling and Billing (API gateway for third-party apps)
+- [ ] Phase 7: REST API (third-party HTTP API with auth and OpenAPI spec)
+- [ ] Phase 8: Patient Chart Sync (incremental sync with revocation)
+- [ ] Phase 9: Integration and Documentation (E2E tests, reference docs)
 
 ## Related Repositories
 
 | Repository | Purpose |
 |-----------|---------|
-| [careagent/provider-core](https://github.com/careagent/provider-core) | Provider-side CareAgent plugin — registers with and routes through the Neuron |
-| [careagent/patient-core](https://github.com/careagent/patient-core) | Patient-side CareAgent plugin — connects to the Neuron to reach providers |
-| [careagent/patient-chart](https://github.com/careagent/patient-chart) | Patient Chart vault — the Neuron may serve as an authorized sync endpoint |
-| [careagent/axon](https://github.com/careagent/axon) | Open foundation network layer — the Neuron registers with and is discoverable through Axon |
-| [careagent/provider-skills](https://github.com/careagent/provider-skills) | Provider clinical skills registry |
-
----
+| [@careagent/axon](https://github.com/careagent/axon) | Open foundation network — discovery, handshake protocol, registry |
+| [@careagent/provider-core](https://github.com/careagent/provider-core) | Provider-side CareAgent — registers with and communicates through the Neuron |
+| [@careagent/patient-core](https://github.com/careagent/patient-core) | Patient-side CareAgent — connects to the Neuron to establish consent |
+| [@careagent/patient-chart](https://github.com/careagent/patient-chart) | Patient Chart vault — immutable clinical record owned by the patient |
 
 ## License
 
 Apache 2.0. See [LICENSE](LICENSE).
-
-The Neuron is free infrastructure. Every line of code in this repository is open, auditable, and improvable by the community it serves.on
