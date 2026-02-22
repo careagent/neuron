@@ -7,6 +7,40 @@ import { registerInitCommand } from './commands/init.js'
 import { registerStartCommand } from './commands/start.js'
 import { registerStopCommand } from './commands/stop.js'
 import { registerStatusCommand } from './commands/status.js'
+import { registerProviderCommand } from './commands/provider.js'
+
+// Mock IPC and registration modules for Phase 2 tests
+vi.mock('../ipc/index.js', () => ({
+  startIpcServer: vi.fn(() => ({
+    close: vi.fn(),
+  })),
+  getSocketPath: vi.fn((storagePath: string) =>
+    join(storagePath, '..', 'neuron.sock'),
+  ),
+  sendIpcCommand: vi.fn(),
+}))
+
+vi.mock('../registration/index.js', () => {
+  const MockAxonRegistrationService = vi.fn(function (this: Record<string, unknown>) {
+    this.start = vi.fn().mockResolvedValue(undefined)
+    this.stop = vi.fn().mockResolvedValue(undefined)
+    this.addProvider = vi.fn().mockResolvedValue(undefined)
+    this.removeProvider = vi.fn().mockResolvedValue(undefined)
+    this.listProviders = vi.fn().mockReturnValue([])
+    this.getStatus = vi.fn().mockReturnValue({
+      neuron: {
+        organization_npi: '1234567893',
+        organization_name: 'Test Practice',
+        status: 'registered',
+        registration_id: 'reg-123',
+        last_heartbeat_at: null,
+        providers: [],
+      },
+      heartbeat: 'healthy',
+    })
+  })
+  return { AxonRegistrationService: MockAxonRegistrationService }
+})
 
 describe('CLI', () => {
   let tempDir: string
@@ -17,6 +51,7 @@ describe('CLI', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+    vi.clearAllMocks()
     rmSync(tempDir, { recursive: true, force: true })
   })
 
@@ -31,17 +66,52 @@ describe('CLI', () => {
     registerStartCommand(program)
     registerStopCommand(program)
     registerStatusCommand(program)
+    registerProviderCommand(program)
     return program
   }
 
+  function writeValidConfig(dir: string): {
+    configPath: string
+    dbPath: string
+    auditPath: string
+  } {
+    const configPath = join(dir, 'neuron.config.json')
+    const dbPath = join(dir, 'data', 'neuron.db')
+    const auditPath = join(dir, 'data', 'audit.jsonl')
+
+    writeFileSync(
+      configPath,
+      JSON.stringify({
+        organization: {
+          npi: '1234567893',
+          name: 'Test Practice',
+          type: 'practice',
+        },
+        server: { port: 3000, host: '0.0.0.0' },
+        storage: { path: dbPath },
+        audit: { path: auditPath, enabled: true },
+        localNetwork: { enabled: false },
+        heartbeat: { intervalMs: 60000 },
+        axon: {
+          registryUrl: 'http://localhost:9999',
+          endpointUrl: 'http://localhost:3000',
+          backoffCeilingMs: 300000,
+        },
+      }),
+    )
+
+    return { configPath, dbPath, auditPath }
+  }
+
   describe('help output', () => {
-    it('should list all four commands in help', () => {
+    it('should list all commands in help including provider', () => {
       const program = createProgram()
       const help = program.helpInformation()
       expect(help).toContain('init')
       expect(help).toContain('start')
       expect(help).toContain('stop')
       expect(help).toContain('status')
+      expect(help).toContain('provider')
     })
   })
 
@@ -83,26 +153,8 @@ describe('CLI', () => {
   })
 
   describe('start command', () => {
-    it('should succeed with a valid config', () => {
-      const configPath = join(tempDir, 'neuron.config.json')
-      const dbPath = join(tempDir, 'data', 'neuron.db')
-      const auditPath = join(tempDir, 'data', 'audit.jsonl')
-
-      writeFileSync(
-        configPath,
-        JSON.stringify({
-          organization: {
-            npi: '1234567893',
-            name: 'Test Practice',
-            type: 'practice',
-          },
-          server: { port: 3000, host: '0.0.0.0' },
-          storage: { path: dbPath },
-          audit: { path: auditPath, enabled: true },
-          localNetwork: { enabled: false },
-          heartbeat: { intervalMs: 60000 },
-        }),
-      )
+    it('should succeed with a valid config and initialize registration', async () => {
+      const { configPath, dbPath, auditPath } = writeValidConfig(tempDir)
 
       const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
 
@@ -111,6 +163,11 @@ describe('CLI', () => {
 
       const program = createProgram()
       program.parse(['node', 'neuron', 'start', '--config', configPath])
+
+      // Wait for async action to complete
+      await vi.waitFor(() => {
+        expect(existsSync(dbPath)).toBe(true)
+      })
 
       expect(exitSpy).not.toHaveBeenCalled()
 
@@ -124,6 +181,40 @@ describe('CLI', () => {
       expect(entry.category).toBe('admin')
       expect(entry.action).toBe('neuron_start')
       expect(entry.details.npi).toBe('1234567893')
+    })
+
+    it('should start IPC server during startup', async () => {
+      const { configPath } = writeValidConfig(tempDir)
+
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+      vi.spyOn(global, 'setInterval').mockReturnValue(0 as unknown as ReturnType<typeof setInterval>)
+
+      const { startIpcServer } = await import('../ipc/index.js')
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'start', '--config', configPath])
+
+      // Wait for async action
+      await vi.waitFor(() => {
+        expect(startIpcServer).toHaveBeenCalled()
+      })
+    })
+
+    it('should initialize AxonRegistrationService during startup', async () => {
+      const { configPath } = writeValidConfig(tempDir)
+
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+      vi.spyOn(global, 'setInterval').mockReturnValue(0 as unknown as ReturnType<typeof setInterval>)
+
+      const { AxonRegistrationService } = await import('../registration/index.js')
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'start', '--config', configPath])
+
+      // Wait for async action
+      await vi.waitFor(() => {
+        expect(AxonRegistrationService).toHaveBeenCalled()
+      })
     })
 
     it('should exit with error for invalid NPI config', () => {
@@ -174,7 +265,7 @@ describe('CLI', () => {
       expect(exitSpy).toHaveBeenCalledWith(1)
     })
 
-    it('should create data directory if missing', () => {
+    it('should create data directory if missing', async () => {
       const configPath = join(tempDir, 'neuron.config.json')
       const nestedDataDir = join(tempDir, 'nested', 'deep', 'data')
       const dbPath = join(nestedDataDir, 'neuron.db')
@@ -193,6 +284,11 @@ describe('CLI', () => {
           audit: { path: auditPath, enabled: true },
           localNetwork: { enabled: false },
           heartbeat: { intervalMs: 60000 },
+          axon: {
+            registryUrl: 'http://localhost:9999',
+            endpointUrl: 'http://localhost:3000',
+            backoffCeilingMs: 300000,
+          },
         }),
       )
 
@@ -202,8 +298,173 @@ describe('CLI', () => {
       const program = createProgram()
       program.parse(['node', 'neuron', 'start', '--config', configPath])
 
-      expect(existsSync(nestedDataDir)).toBe(true)
+      await vi.waitFor(() => {
+        expect(existsSync(nestedDataDir)).toBe(true)
+      })
+
       expect(existsSync(dbPath)).toBe(true)
+    })
+  })
+
+  describe('provider commands', () => {
+    it('should validate NPI on provider add', async () => {
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+      const stderrSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'provider', 'add', '0000000000'])
+
+      await vi.waitFor(() => {
+        expect(exitSpy).toHaveBeenCalledWith(1)
+      })
+
+      expect(stderrSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid NPI'),
+      )
+    })
+
+    it('should send IPC command on provider add with valid NPI', async () => {
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+      const { sendIpcCommand } = await import('../ipc/index.js')
+      vi.mocked(sendIpcCommand).mockResolvedValue({ ok: true })
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'provider', 'add', '1234567893'])
+
+      await vi.waitFor(() => {
+        expect(sendIpcCommand).toHaveBeenCalledWith(
+          expect.any(String),
+          { type: 'provider.add', npi: '1234567893' },
+        )
+      })
+
+      expect(exitSpy).not.toHaveBeenCalled()
+    })
+
+    it('should format provider list as table', async () => {
+      const { sendIpcCommand } = await import('../ipc/index.js')
+      vi.mocked(sendIpcCommand).mockResolvedValue({
+        ok: true,
+        data: [
+          { npi: '1234567893', status: 'registered', last_heartbeat: '2026-01-01T00:00:00Z' },
+        ],
+      })
+
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'provider', 'list'])
+
+      await vi.waitFor(() => {
+        expect(sendIpcCommand).toHaveBeenCalledWith(
+          expect.any(String),
+          { type: 'provider.list' },
+        )
+      })
+
+      // Table output should include NPI
+      const calls = stdoutSpy.mock.calls.map((c) => c[0])
+      expect(calls.some((c) => typeof c === 'string' && c.includes('1234567893'))).toBe(true)
+    })
+
+    it('should show message when no providers registered', async () => {
+      const { sendIpcCommand } = await import('../ipc/index.js')
+      vi.mocked(sendIpcCommand).mockResolvedValue({
+        ok: true,
+        data: [],
+      })
+
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'provider', 'list'])
+
+      await vi.waitFor(() => {
+        expect(sendIpcCommand).toHaveBeenCalled()
+      })
+
+      const calls = stdoutSpy.mock.calls.map((c) => c[0])
+      expect(calls.some((c) => typeof c === 'string' && c.includes('No providers registered'))).toBe(true)
+    })
+
+    it('should handle connection error on provider add', async () => {
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+      const stderrSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
+
+      const { sendIpcCommand } = await import('../ipc/index.js')
+      vi.mocked(sendIpcCommand).mockRejectedValue(new Error('ENOENT'))
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'provider', 'add', '1234567893'])
+
+      await vi.waitFor(() => {
+        expect(exitSpy).toHaveBeenCalledWith(1)
+      })
+
+      expect(stderrSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Could not connect to Neuron'),
+      )
+    })
+  })
+
+  describe('status command', () => {
+    it('should show "not running" when server is not running', async () => {
+      const { sendIpcCommand } = await import('../ipc/index.js')
+      vi.mocked(sendIpcCommand).mockRejectedValue(
+        new Error('Neuron is not running (socket not found)'),
+      )
+
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'status', '--config', join(tempDir, 'nonexistent.json')])
+
+      await vi.waitFor(() => {
+        expect(sendIpcCommand).toHaveBeenCalled()
+      })
+
+      const calls = stdoutSpy.mock.calls.map((c) => c[0])
+      expect(calls.some((c) => typeof c === 'string' && c.includes('Neuron is not running'))).toBe(true)
+    })
+
+    it('should display registration status when server is running', async () => {
+      const { sendIpcCommand } = await import('../ipc/index.js')
+      vi.mocked(sendIpcCommand).mockResolvedValue({
+        ok: true,
+        data: {
+          neuron: {
+            organization_npi: '1234567893',
+            organization_name: 'Test Practice',
+            status: 'registered',
+            registration_id: 'reg-123',
+            last_heartbeat_at: '2026-01-01T00:00:00Z',
+            providers: [],
+          },
+          heartbeat: 'healthy',
+        },
+      })
+
+      const stdoutSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
+      vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+
+      const program = createProgram()
+      program.parse(['node', 'neuron', 'status', '--config', join(tempDir, 'nonexistent.json')])
+
+      await vi.waitFor(() => {
+        expect(sendIpcCommand).toHaveBeenCalled()
+      })
+
+      const calls = stdoutSpy.mock.calls.map((c) => c[0])
+      const allOutput = calls.filter((c): c is string => typeof c === 'string').join('')
+      expect(allOutput).toContain('Neuron Status')
+      expect(allOutput).toContain('Test Practice')
+      expect(allOutput).toContain('registered')
+      expect(allOutput).toContain('reg-123')
+      expect(allOutput).toContain('healthy')
     })
   })
 })
