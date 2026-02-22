@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 2 of 9 (Axon Registration)
-Plan: 3 of 4 in current phase
+Plan: 4 of 4 in current phase
 Status: Executing Phase 2
-Last activity: 2026-02-22 -- Completed 02-03-PLAN.md (IPC communication layer)
+Last activity: 2026-02-22 -- Completed 02-02-PLAN.md (core registration engine)
 
-Progress: [███░░░░░░░] 25%
+Progress: [████░░░░░░] 31%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 2.5min
-- Total execution time: 0.08 hours
+- Total plans completed: 3
+- Average duration: 3min
+- Total execution time: 0.15 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 02-axon-registration | 2 | 5min | 2.5min |
+| 02-axon-registration | 3 | 9min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (3min), 02-03 (2min)
-- Trend: Accelerating
+- Last 5 plans: 02-01 (3min), 02-03 (2min), 02-02 (4min)
+- Trend: Steady
 
 *Updated after each plan completion*
 
@@ -52,6 +52,9 @@ Recent decisions affecting current work:
 - [02-03]: Socket path co-located with database file via getSocketPath(storagePath)
 - [02-03]: 5-second client timeout with descriptive error messages
 - [02-03]: Stale socket cleanup via unlinkSync before server.listen
+- [Phase 02-02]: HEARTBEAT_INTERVAL_MS is a module-level constant (60000), enforcing fixed 60-second interval
+- [Phase 02-02]: Backoff uses full jitter formula per AWS recommendation; writeHealthFile uses writeFileSync
+- [Phase 02-02]: Bearer token never logged or audited; service enters degraded mode on Axon unreachable
 
 ### Pending Todos
 
@@ -66,5 +69,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 02-03-PLAN.md (IPC communication layer)
+Stopped at: Completed 02-02-PLAN.md (core registration engine)
 Resume file: None

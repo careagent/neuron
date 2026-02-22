@@ -24,12 +24,12 @@
 
 ### National Registration (NREG)
 
-- [ ] **NREG-01**: Organization registration with Axon using NPI via `AxonRegistry.registerNeuron()`
-- [ ] **NREG-02**: Provider registration with Axon via `AxonRegistry.registerProvider()` (providers never contact Axon directly)
-- [ ] **NREG-03**: Periodic heartbeat to maintain `reachable` status via `AxonRegistry.updateEndpoint()`
+- [x] **NREG-01**: Organization registration with Axon using NPI via `AxonRegistry.registerNeuron()`
+- [x] **NREG-02**: Provider registration with Axon via `AxonRegistry.registerProvider()` (providers never contact Axon directly)
+- [x] **NREG-03**: Periodic heartbeat to maintain `reachable` status via `AxonRegistry.updateEndpoint()`
 - [x] **NREG-04**: Dynamic provider management (add/remove/update without restart) via CLI
 - [x] **NREG-05**: Registration state persistence (NeuronRegistrationState) across Neuron restarts
-- [ ] **NREG-06**: Graceful degradation when Axon is unreachable (established relationships continue operating)
+- [x] **NREG-06**: Graceful degradation when Axon is unreachable (established relationships continue operating)
 - [x] **NREG-07**: Mock Axon registry for development and testing
 
 ### Consent Verification (CSNT)
@@ -164,12 +164,12 @@
 | AUDT-01 | Phase 1 | Pending |
 | AUDT-02 | Phase 1 | Pending |
 | AUDT-03 | Phase 1 | Pending |
-| NREG-01 | Phase 2 | Pending |
-| NREG-02 | Phase 2 | Pending |
-| NREG-03 | Phase 2 | Pending |
+| NREG-01 | Phase 2 | Complete |
+| NREG-02 | Phase 2 | Complete |
+| NREG-03 | Phase 2 | Complete |
 | NREG-04 | Phase 2 | Complete |
 | NREG-05 | Phase 2 | Complete |
-| NREG-06 | Phase 2 | Pending |
+| NREG-06 | Phase 2 | Complete |
 | NREG-07 | Phase 2 | Complete |
 | CSNT-01 | Phase 3 | Pending |
 | CSNT-02 | Phase 3 | Pending |
