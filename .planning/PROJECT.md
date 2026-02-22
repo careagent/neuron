@@ -22,6 +22,8 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - ✓ API key authentication with rate limiting — Phase 6
 - ✓ Organization, relationship, status routes — Phase 6
 - ✓ OpenAPI 3.1 specification — Phase 6
+- ✓ E2E integration tests covering full lifecycle, discovery, and REST API — Phase 7
+- ✓ REST API documentation, architecture guide, and configuration reference — Phase 7
 
 ### Active
 
@@ -42,8 +44,6 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - [ ] Terminated relationships permanently stop routing
 - [ ] Bidirectional session bridge between patient and provider
 - [ ] Hash-chained JSONL audit log with SHA-256 tamper-evident chain
-- [ ] E2E integration tests covering all core functionalities
-- [ ] REST API documentation, architecture guide, configuration reference
 
 ### Out of Scope
 
@@ -114,6 +114,8 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 | nrn_ prefixed API keys with SHA-256 hashing | Keys identifiable in logs; only hash stored for breach protection | Phase 6 |
 | REST router reuses Phase 4 HTTP server | One port for WS + REST; router ignores non-/v1 paths to avoid WS conflict | Phase 6 |
 | Read-only REST API in v1 | All endpoints GET; API key management via CLI only | Phase 6 |
+| NeuronTestHarness pattern for E2E testing | Compose all subsystems in start.ts order without CLI child process | Phase 7 |
+| AI-agent optimized documentation | Consistent structure, tables, Mermaid diagrams, code examples | Phase 7 |
 
 ---
-*Last updated: 2026-02-22 after Phase 7 removal (Patient Chart Sync)*
+*Last updated: 2026-02-22 after Phase 7 (Integration and Documentation)*
