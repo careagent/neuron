@@ -5,32 +5,32 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Every NPI-holding organization can connect to the CareAgent network through a free, secure organizational boundary that routes patient connections, verifies consent, and never holds clinical data.
-**Current focus:** Phase 2: Axon Registration
+**Current focus:** Phase 2: Axon Registration (Complete)
 
 ## Current Position
 
-Phase: 2 of 9 (Axon Registration)
-Plan: 4 of 4 in current phase
-Status: Executing Phase 2
-Last activity: 2026-02-22 -- Completed 02-02-PLAN.md (core registration engine)
+Phase: 2 of 9 (Axon Registration) -- COMPLETE
+Plan: 4 of 4 in current phase (all complete)
+Status: Phase 2 Complete
+Last activity: 2026-02-22 -- Completed 02-04-PLAN.md (CLI integration)
 
-Progress: [████░░░░░░] 31%
+Progress: [████░░░░░░] 33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
+- Total plans completed: 4
 - Average duration: 3min
-- Total execution time: 0.15 hours
+- Total execution time: 0.20 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 02-axon-registration | 3 | 9min | 3min |
+| 02-axon-registration | 4 | 12min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (3min), 02-03 (2min), 02-02 (4min)
+- Last 5 plans: 02-01 (3min), 02-03 (2min), 02-02 (4min), 02-04 (3min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -55,6 +55,10 @@ Recent decisions affecting current work:
 - [Phase 02-02]: HEARTBEAT_INTERVAL_MS is a module-level constant (60000), enforcing fixed 60-second interval
 - [Phase 02-02]: Backoff uses full jitter formula per AWS recommendation; writeHealthFile uses writeFileSync
 - [Phase 02-02]: Bearer token never logged or audited; service enters degraded mode on Axon unreachable
+- [02-04]: Provider commands resolve socket path from config with fallback to default ./data/neuron.sock
+- [02-04]: IPC handler routing implemented inline in start command via switch on command.type
+- [02-04]: Registration service created before IPC server but start() called after IPC is listening
+- [02-04]: Commander start action is async for registration lifecycle management
 
 ### Pending Todos
 
@@ -69,5 +73,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 02-02-PLAN.md (core registration engine)
+Stopped at: Completed 02-04-PLAN.md (CLI integration -- Phase 2 complete)
 Resume file: None
