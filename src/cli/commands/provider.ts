@@ -42,7 +42,10 @@ export function registerProviderCommand(program: Command): void {
   provider
     .command('add <npi>')
     .description('Register a provider with Axon')
-    .action(async (npi: string) => {
+    .requiredOption('--name <name>', 'provider display name (e.g., "Dr. Jane Smith")')
+    .requiredOption('--type <types...>', 'provider types (e.g., physician therapist)')
+    .option('--specialty <specialty>', 'provider specialty (e.g., "Internal Medicine")')
+    .action(async (npi: string, options: { name: string; type: string[]; specialty?: string }) => {
       if (!isValidNpi(npi)) {
         output.error(`Invalid NPI: ${npi}`)
         process.exit(1)
@@ -55,6 +58,9 @@ export function registerProviderCommand(program: Command): void {
         const response = await sendIpcCommand(socketPath, {
           type: 'provider.add',
           npi,
+          name: options.name,
+          provider_types: options.type,
+          ...(options.specialty !== undefined && { specialty: options.specialty }),
         })
 
         if (response.ok) {

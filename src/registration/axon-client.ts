@@ -32,6 +32,9 @@ export interface RegisterNeuronResponse {
 
 export interface RegisterProviderPayload {
   provider_npi: string
+  provider_name: string
+  provider_types: string[]
+  specialty?: string
 }
 
 export interface RegisterProviderResponse {

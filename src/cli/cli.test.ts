@@ -411,7 +411,7 @@ describe('CLI', () => {
       const stderrSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(true)
 
       const program = createProgram()
-      program.parse(['node', 'neuron', 'provider', 'add', '0000000000'])
+      program.parse(['node', 'neuron', 'provider', 'add', '0000000000', '--name', 'Dr. Test', '--type', 'physician'])
 
       await vi.waitFor(() => {
         expect(exitSpy).toHaveBeenCalledWith(1)
@@ -429,12 +429,12 @@ describe('CLI', () => {
       vi.mocked(sendIpcCommand).mockResolvedValue({ ok: true })
 
       const program = createProgram()
-      program.parse(['node', 'neuron', 'provider', 'add', '1234567893'])
+      program.parse(['node', 'neuron', 'provider', 'add', '1234567893', '--name', 'Dr. Test', '--type', 'physician'])
 
       await vi.waitFor(() => {
         expect(sendIpcCommand).toHaveBeenCalledWith(
           expect.any(String),
-          { type: 'provider.add', npi: '1234567893' },
+          { type: 'provider.add', npi: '1234567893', name: 'Dr. Test', provider_types: ['physician'] },
         )
       })
 
@@ -497,7 +497,7 @@ describe('CLI', () => {
       vi.mocked(sendIpcCommand).mockRejectedValue(new Error('ENOENT'))
 
       const program = createProgram()
-      program.parse(['node', 'neuron', 'provider', 'add', '1234567893'])
+      program.parse(['node', 'neuron', 'provider', 'add', '1234567893', '--name', 'Dr. Test', '--type', 'physician'])
 
       await vi.waitFor(() => {
         expect(exitSpy).toHaveBeenCalledWith(1)

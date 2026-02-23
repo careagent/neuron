@@ -12,6 +12,9 @@ export type ProviderRegistrationStatus = Static<typeof ProviderRegistrationStatu
 /** Per-provider registration record */
 export const ProviderRegistrationSchema = Type.Object({
   provider_npi: NpiString,
+  provider_name: Type.Optional(Type.String()),
+  provider_types: Type.Optional(Type.Array(Type.String())),
+  specialty: Type.Optional(Type.String()),
   axon_provider_id: Type.Optional(Type.String()),
   registration_status: ProviderRegistrationStatus,
   first_registered_at: Type.Optional(IsoDateString),

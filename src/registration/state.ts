@@ -30,6 +30,9 @@ interface NeuronRegistrationRow {
 /** Row shape for provider_registrations table reads. */
 interface ProviderRegistrationRow {
   provider_npi: string
+  provider_name: string | null
+  provider_types: string | null
+  specialty: string | null
   axon_provider_id: string | null
   registration_status: string
   first_registered_at: string | null
@@ -122,11 +125,15 @@ export class RegistrationStateStore {
   saveProvider(provider: ProviderRegistration): void {
     this.storage.run(
       `INSERT OR REPLACE INTO provider_registrations
-        (provider_npi, axon_provider_id, registration_status,
+        (provider_npi, provider_name, provider_types, specialty,
+         axon_provider_id, registration_status,
          first_registered_at, last_heartbeat_at, last_axon_response_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         provider.provider_npi,
+        provider.provider_name ?? null,
+        provider.provider_types ? JSON.stringify(provider.provider_types) : null,
+        provider.specialty ?? null,
         provider.axon_provider_id ?? null,
         provider.registration_status,
         provider.first_registered_at ?? null,
@@ -155,6 +162,9 @@ export class RegistrationStateStore {
     )
     return rows.map((row) => ({
       provider_npi: row.provider_npi,
+      provider_name: row.provider_name ?? undefined,
+      provider_types: row.provider_types ? JSON.parse(row.provider_types) as string[] : undefined,
+      specialty: row.specialty ?? undefined,
       axon_provider_id: row.axon_provider_id ?? undefined,
       registration_status: row.registration_status as ProviderRegistration['registration_status'],
       first_registered_at: row.first_registered_at ?? undefined,

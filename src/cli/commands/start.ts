@@ -98,7 +98,7 @@ export function registerStartCommand(program: Command): void {
         try {
           switch (command.type) {
             case 'provider.add': {
-              await registrationService.addProvider(command.npi)
+              await registrationService.addProvider(command.npi, command.name, command.provider_types, command.specialty)
               return { ok: true, data: { npi: command.npi } }
             }
             case 'provider.remove': {

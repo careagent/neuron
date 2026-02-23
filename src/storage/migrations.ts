@@ -148,6 +148,15 @@ export const migrations: Migration[] = [
       CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON api_keys(key_hash);
     `,
   },
+  {
+    version: 5,
+    description: 'Add provider name, types, and specialty to provider_registrations',
+    up: `
+      ALTER TABLE provider_registrations ADD COLUMN provider_name TEXT;
+      ALTER TABLE provider_registrations ADD COLUMN provider_types TEXT;
+      ALTER TABLE provider_registrations ADD COLUMN specialty TEXT;
+    `,
+  },
 ]
 
 /**

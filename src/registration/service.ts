@@ -57,6 +57,9 @@ export class AxonRegistrationService {
           try {
             await this.client.registerProvider(existingState.registration_id, {
               provider_npi: provider.provider_npi,
+              provider_name: provider.provider_name ?? provider.provider_npi,
+              provider_types: provider.provider_types ?? ['physician'],
+              ...(provider.specialty !== undefined && { specialty: provider.specialty }),
             })
           } catch {
             // Provider re-registration failure is non-fatal on restart
@@ -138,7 +141,7 @@ export class AxonRegistrationService {
   /**
    * Register a provider with Axon and persist to state.
    */
-  async addProvider(npi: string): Promise<void> {
+  async addProvider(npi: string, name: string, providerTypes: string[], specialty?: string): Promise<void> {
     const state = this.stateStore.load()
     if (!state || !state.registration_id) {
       throw new Error('Cannot add provider: neuron not registered')
@@ -146,10 +149,16 @@ export class AxonRegistrationService {
 
     const result = await this.client.registerProvider(state.registration_id, {
       provider_npi: npi,
+      provider_name: name,
+      provider_types: providerTypes,
+      ...(specialty !== undefined && { specialty }),
     })
 
     this.stateStore.saveProvider({
       provider_npi: npi,
+      provider_name: name,
+      provider_types: providerTypes,
+      specialty,
       axon_provider_id: result.provider_id,
       registration_status: 'registered',
       first_registered_at: new Date().toISOString(),

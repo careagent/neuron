@@ -2,7 +2,13 @@ import { Type, type Static } from '@sinclair/typebox'
 
 /** IPC command schema — discriminated union of all supported commands. */
 export const IpcCommandSchema = Type.Union([
-  Type.Object({ type: Type.Literal('provider.add'), npi: Type.String() }),
+  Type.Object({
+    type: Type.Literal('provider.add'),
+    npi: Type.String(),
+    name: Type.String(),
+    provider_types: Type.Array(Type.String()),
+    specialty: Type.Optional(Type.String()),
+  }),
   Type.Object({ type: Type.Literal('provider.remove'), npi: Type.String() }),
   Type.Object({ type: Type.Literal('provider.list') }),
   Type.Object({ type: Type.Literal('status') }),
