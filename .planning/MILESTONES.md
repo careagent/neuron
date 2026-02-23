@@ -22,5 +22,16 @@
 7. E2E integration tests (full lifecycle, mDNS discovery, REST API) and reference documentation (API, architecture, configuration)
 8. Tech debt closure — IPC shutdown wiring, `api_access` audit producers, `verify-audit` CLI command
 
+**Post-release fixes (4 commits after v1.0 tag):**
+- fix: untracked source files from Phases 6-8
+- fix: bonjour-service named import (mDNS runtime crash)
+- fix: provider registration payload (name, types, specialty for Axon)
+- docs: PRD.md added, health file gitignored
+
+**Live deployment:**
+- Neuron installed globally at `/opt/homebrew/bin/neuron`, running at `~/neuron/`
+- Registered with Axon at https://axon.opencare.ai (ID: 32f0972b-d6a8-4b1f-a670-0b63d76f485d)
+- Provider Dr. Jane Smith (NPI 1497758544) registered, heartbeat healthy
+
 ---
 

@@ -88,7 +88,7 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 
 ## Context
 
-**Shipped v1.0 MVP** with 11,147 LOC TypeScript, 239 tests (17 test files), 115 commits over 4 days.
+**Shipped v1.0 MVP** with 11,147 LOC TypeScript, 239 tests (17 test files), 115 commits over 4 days. Live-tested against Axon at https://axon.opencare.ai — Neuron registered, provider added, heartbeat healthy.
 
 **Tech stack:** Node.js >=22.12.0, TypeScript ~5.7.x, pnpm, tsdown, vitest, better-sqlite3, ws, bonjour-service, @sinclair/typebox.
 
@@ -102,7 +102,7 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - Uses AxonMessage format for protocol-level messages
 
 **Related repos:**
-- `@careagent/axon` — PRD complete, not yet built
+- `@careagent/axon` — v1.0 deployed at https://axon.opencare.ai (Docker + Caddy, 253 tests passing)
 - `@careagent/provider-core` — v1 phases 1-5 complete
 - `@careagent/patient-core` — PRD complete, not yet built
 - `@careagent/patient-chart` — README only, not yet built
@@ -143,6 +143,8 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 | AI-agent optimized documentation | Consistent structure, tables, Mermaid diagrams, code examples | ✓ Good |
 | IPC shutdown with setTimeout flush | Delay process.exit to flush IPC response before shutdown | ✓ Good — clean stop behavior |
 | api_access audit inline in router | Not middleware; direct inline placement at audit trigger points | ✓ Good — explicit audit points |
+| Named import for bonjour-service | tsdown bundles default import as module object; `{ Bonjour }` named import works in both vitest and tsdown | ✓ Good — fixed runtime crash |
+| Provider registration payload with name/types | Axon requires provider_name and provider_types; added CLI options, migration v5, full chain threading | ✓ Good — live-tested against Axon |
 
 ---
-*Last updated: 2026-02-22 after v1.0 milestone*
+*Last updated: 2026-02-22 after v1.0 live deployment*
