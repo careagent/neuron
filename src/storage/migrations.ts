@@ -181,6 +181,28 @@ export const migrations: Migration[] = [
         ON consent_relationships(status);
     `,
   },
+  {
+    version: 7,
+    description: 'Create audit_log table for consent audit trail with hash chain and Ed25519 signatures',
+    up: `
+      CREATE TABLE IF NOT EXISTS audit_log (
+        id TEXT PRIMARY KEY,
+        timestamp INTEGER NOT NULL,
+        action TEXT NOT NULL,
+        relationship_id TEXT NOT NULL,
+        actor_public_key TEXT NOT NULL,
+        details TEXT NOT NULL,
+        previous_hash TEXT NOT NULL,
+        hash TEXT NOT NULL,
+        signature TEXT NOT NULL
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_audit_relationship
+        ON audit_log(relationship_id);
+      CREATE INDEX IF NOT EXISTS idx_audit_timestamp
+        ON audit_log(timestamp);
+    `,
+  },
 ]
 
 /**
