@@ -42,6 +42,26 @@ export interface RegisterProviderResponse {
   status: string
 }
 
+export interface RegistrySearchResult {
+  npi: string
+  entity_type: string
+  name: string
+  credential_status: string
+  provider_types?: string[]
+  specialty?: string
+  affiliations?: Array<{
+    organization_npi: string
+    organization_name: string
+    neuron_endpoint?: string
+  }>
+  registered_at: string
+  last_updated: string
+}
+
+export interface RegistrySearchResponse {
+  results: RegistrySearchResult[]
+}
+
 export class AxonClient {
   private bearerToken?: string
 
@@ -142,5 +162,35 @@ export class AxonClient {
     if (!res.ok) {
       throw new AxonError(`removeProvider failed: ${res.status}`, res.status)
     }
+  }
+
+  /**
+   * Lookup a registry entry by NPI.
+   * GET /v1/registry/:npi
+   */
+  async lookupByNpi(npi: string): Promise<RegistrySearchResult> {
+    const res = await fetch(`${this.registryUrl}/v1/registry/${npi}`)
+    if (!res.ok) {
+      throw new AxonError(`lookupByNpi failed: ${res.status}`, res.status)
+    }
+    return (await res.json()) as RegistrySearchResult
+  }
+
+  /**
+   * Search the registry with optional filters.
+   * GET /v1/registry/search
+   */
+  async search(params?: Record<string, string>): Promise<RegistrySearchResponse> {
+    const url = new URL(`${this.registryUrl}/v1/registry/search`)
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        url.searchParams.set(key, value)
+      }
+    }
+    const res = await fetch(url.toString())
+    if (!res.ok) {
+      throw new AxonError(`search failed: ${res.status}`, res.status)
+    }
+    return (await res.json()) as RegistrySearchResponse
   }
 }

@@ -53,6 +53,51 @@ const handlers = [
   http.delete(`${MOCK_BASE}/v1/neurons/:id/providers/:npi`, () => {
     return new HttpResponse(null, { status: 204 })
   }),
+
+  http.get(`${MOCK_BASE}/v1/registry/search`, ({ request }) => {
+    const url = new URL(request.url)
+    const npi = url.searchParams.get('npi')
+    const results = npi
+      ? [
+          {
+            npi,
+            entity_type: 'individual',
+            name: 'Dr. Test',
+            credential_status: 'active',
+            provider_types: ['physician'],
+            registered_at: '2026-01-01T00:00:00Z',
+            last_updated: '2026-01-01T00:00:00Z',
+          },
+        ]
+      : []
+    return HttpResponse.json({ results })
+  }),
+
+  http.get(`${MOCK_BASE}/v1/registry/:npi`, ({ params }) => {
+    if (params.npi === '0000000000') {
+      return HttpResponse.json(
+        { error: `No registry entry found for NPI: "${params.npi}"` },
+        { status: 404 },
+      )
+    }
+    return HttpResponse.json({
+      npi: params.npi,
+      entity_type: 'individual',
+      name: 'Dr. Test',
+      credential_status: 'active',
+      provider_types: ['physician'],
+      specialty: 'Internal Medicine',
+      affiliations: [
+        {
+          organization_npi: '1234567893',
+          organization_name: 'Test Clinic',
+          neuron_endpoint: 'http://localhost:3000',
+        },
+      ],
+      registered_at: '2026-01-01T00:00:00Z',
+      last_updated: '2026-01-01T00:00:00Z',
+    })
+  }),
 ]
 
 const mswServer = setupServer(...handlers)
@@ -126,6 +171,8 @@ describe('AxonClient', () => {
     const client = new AxonClient(MOCK_BASE, 'token')
     const result = await client.registerProvider('test-reg-id', {
       provider_npi: '9876543210',
+      provider_name: 'Dr. Test',
+      provider_types: ['physician'],
     })
     expect(result.provider_id).toBe('test-provider-id')
     expect(result.status).toBe('registered')
@@ -176,6 +223,34 @@ describe('AxonClient', () => {
     await expect(
       client.updateEndpoint('test-reg-id', { neuron_endpoint_url: 'http://localhost:3000' }),
     ).resolves.toBeUndefined()
+  })
+
+  it('lookupByNpi returns registry entry', async () => {
+    const client = new AxonClient(MOCK_BASE)
+    const result = await client.lookupByNpi('9876543210')
+    expect(result.npi).toBe('9876543210')
+    expect(result.entity_type).toBe('individual')
+    expect(result.name).toBe('Dr. Test')
+    expect(result.affiliations).toBeDefined()
+    expect(result.affiliations![0].organization_npi).toBe('1234567893')
+  })
+
+  it('lookupByNpi throws AxonError for unknown NPI', async () => {
+    const client = new AxonClient(MOCK_BASE)
+    await expect(client.lookupByNpi('0000000000')).rejects.toThrow(AxonError)
+  })
+
+  it('search returns matching results', async () => {
+    const client = new AxonClient(MOCK_BASE)
+    const result = await client.search({ npi: '9876543210' })
+    expect(result.results).toHaveLength(1)
+    expect(result.results[0].npi).toBe('9876543210')
+  })
+
+  it('search returns empty results when no match', async () => {
+    const client = new AxonClient(MOCK_BASE)
+    const result = await client.search()
+    expect(result.results).toHaveLength(0)
   })
 })
 
@@ -603,11 +678,13 @@ describe('AxonRegistrationService', () => {
     const service = new AxonRegistrationService(config, storage)
     await service.start()
 
-    await service.addProvider('9876543210')
+    await service.addProvider('9876543210', 'Dr. Test', ['physician'])
 
     const providers = service.listProviders()
     expect(providers).toHaveLength(1)
     expect(providers[0].provider_npi).toBe('9876543210')
+    expect(providers[0].provider_name).toBe('Dr. Test')
+    expect(providers[0].provider_types).toEqual(['physician'])
     expect(providers[0].axon_provider_id).toBe('test-provider-id')
     expect(providers[0].registration_status).toBe('registered')
 
@@ -619,7 +696,7 @@ describe('AxonRegistrationService', () => {
     const service = new AxonRegistrationService(config, storage)
     await service.start()
 
-    await service.addProvider('9876543210')
+    await service.addProvider('9876543210', 'Dr. Test', ['physician'])
     expect(service.listProviders()).toHaveLength(1)
 
     await service.removeProvider('9876543210')

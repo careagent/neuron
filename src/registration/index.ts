@@ -4,6 +4,8 @@ export type {
   RegisterNeuronResponse,
   RegisterProviderPayload,
   RegisterProviderResponse,
+  RegistrySearchResult,
+  RegistrySearchResponse,
 } from './axon-client.js'
 
 export { RegistrationStateStore } from './state.js'
