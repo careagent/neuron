@@ -157,6 +157,30 @@ export const migrations: Migration[] = [
       ALTER TABLE provider_registrations ADD COLUMN specialty TEXT;
     `,
   },
+  {
+    version: 6,
+    description: 'Create consent_relationships table for consent lifecycle tracking',
+    up: `
+      CREATE TABLE IF NOT EXISTS consent_relationships (
+        id TEXT PRIMARY KEY,
+        patient_public_key TEXT NOT NULL,
+        provider_public_key TEXT NOT NULL,
+        scope TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        consent_token TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        expires_at INTEGER NOT NULL
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_consent_rel_patient
+        ON consent_relationships(patient_public_key);
+      CREATE INDEX IF NOT EXISTS idx_consent_rel_provider
+        ON consent_relationships(provider_public_key);
+      CREATE INDEX IF NOT EXISTS idx_consent_rel_status
+        ON consent_relationships(status);
+    `,
+  },
 ]
 
 /**
