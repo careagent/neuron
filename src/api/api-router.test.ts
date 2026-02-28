@@ -268,7 +268,7 @@ describe('REST API Router', () => {
       })
       expect(res.status).toBe(204)
       expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://allowed.example.com')
-      expect(res.headers.get('Access-Control-Allow-Methods')).toBe('GET, OPTIONS')
+      expect(res.headers.get('Access-Control-Allow-Methods')).toBe('GET, POST, OPTIONS')
       expect(res.headers.get('Access-Control-Allow-Headers')).toBe('X-API-Key, Content-Type')
       expect(res.headers.get('Access-Control-Max-Age')).toBe('86400')
     })

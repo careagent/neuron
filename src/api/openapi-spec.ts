@@ -114,9 +114,95 @@ export const openapiSpec = {
           'providers',
         ],
       },
+      Health: {
+        type: 'object' as const,
+        properties: {
+          status: { type: 'string' as const, enum: ['ok'] },
+          timestamp: { type: 'string' as const, format: 'date-time' },
+          uptime_seconds: { type: 'integer' as const },
+        },
+        required: ['status', 'timestamp', 'uptime_seconds'],
+      },
+      ProviderRegistration: {
+        type: 'object' as const,
+        properties: {
+          provider_npi: { type: 'string' as const, pattern: '^\\d{10}$' },
+          provider_name: { type: 'string' as const },
+          provider_types: { type: 'array' as const, items: { type: 'string' as const } },
+          specialty: { type: 'string' as const },
+          registration_status: { type: 'string' as const, enum: ['pending', 'registered', 'failed'] },
+          axon_provider_id: { type: 'string' as const },
+          first_registered_at: { type: 'string' as const, format: 'date-time' },
+        },
+        required: ['provider_npi', 'registration_status'],
+      },
+      RegistrationList: {
+        type: 'object' as const,
+        properties: {
+          neuron: {
+            type: 'object' as const,
+            properties: {
+              organization_npi: { type: 'string' as const },
+              organization_name: { type: 'string' as const },
+              organization_type: { type: 'string' as const },
+              status: { type: 'string' as const },
+              registration_id: { type: 'string' as const },
+              first_registered_at: { type: 'string' as const },
+            },
+            nullable: true,
+          },
+          providers: {
+            type: 'array' as const,
+            items: { $ref: '#/components/schemas/ProviderRegistration' },
+          },
+          total_providers: { type: 'integer' as const },
+        },
+        required: ['providers', 'total_providers'],
+      },
+      ConsentStatus: {
+        type: 'object' as const,
+        properties: {
+          relationship_id: { type: 'string' as const },
+          status: { type: 'string' as const },
+          patient_agent_id: { type: 'string' as const },
+          provider_npi: { type: 'string' as const },
+          consented_actions: { type: 'array' as const, items: { type: 'string' as const } },
+          created_at: { type: 'string' as const },
+          updated_at: { type: 'string' as const },
+        },
+        required: ['relationship_id', 'status'],
+      },
+      CreateRegistrationRequest: {
+        type: 'object' as const,
+        properties: {
+          provider_npi: { type: 'string' as const, pattern: '^\\d{10}$' },
+          provider_name: { type: 'string' as const, minLength: 1 },
+          provider_types: { type: 'array' as const, items: { type: 'string' as const }, minItems: 1 },
+          specialty: { type: 'string' as const },
+        },
+        required: ['provider_npi', 'provider_name', 'provider_types'],
+      },
     },
   },
   paths: {
+    '/health': {
+      get: {
+        summary: 'Health check',
+        description: 'Returns basic liveness information. No authentication required.',
+        operationId: 'healthCheck',
+        security: [],
+        responses: {
+          '200': {
+            description: 'Service is healthy',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Health' },
+              },
+            },
+          },
+        },
+      },
+    },
     '/organization': {
       get: {
         summary: 'Get organization info',
@@ -229,6 +315,186 @@ export const openapiSpec = {
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/Relationship' },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          '404': {
+            description: 'Relationship not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          '429': {
+            description: 'Rate limit exceeded',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/registrations': {
+      get: {
+        summary: 'List registered entities',
+        description: 'Returns the neuron registration state and all registered providers.',
+        operationId: 'listRegistrations',
+        responses: {
+          '200': {
+            description: 'Registration list',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/RegistrationList' },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          '429': {
+            description: 'Rate limit exceeded',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+        },
+      },
+      post: {
+        summary: 'Register a new provider',
+        description: 'Registers a new provider with Axon and persists to state.',
+        operationId: 'createRegistration',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/CreateRegistrationRequest' },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'Provider registered',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ProviderRegistration' },
+              },
+            },
+          },
+          '400': {
+            description: 'Validation error',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          '429': {
+            description: 'Rate limit exceeded',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/registrations/{id}': {
+      get: {
+        summary: 'Get specific registration',
+        description: 'Returns a single provider registration by NPI.',
+        operationId: 'getRegistration',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path' as const,
+            required: true,
+            schema: { type: 'string' as const },
+            description: 'Provider NPI',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Provider registration',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ProviderRegistration' },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          '404': {
+            description: 'Registration not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          '429': {
+            description: 'Rate limit exceeded',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/consent/status/{relationship_id}': {
+      get: {
+        summary: 'Get consent relationship status',
+        description: 'Returns the consent status for a specific relationship.',
+        operationId: 'getConsentStatus',
+        parameters: [
+          {
+            name: 'relationship_id',
+            in: 'path' as const,
+            required: true,
+            schema: { type: 'string' as const },
+            description: 'Relationship ID',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Consent status',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ConsentStatus' },
               },
             },
           },

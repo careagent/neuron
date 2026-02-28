@@ -8,7 +8,7 @@
  *   1. Parse URL
  *   2. Ignore non-API paths (let WebSocket upgrade etc. pass through)
  *   3. CORS headers (before auth/error so preflight always works)
- *   4. Public endpoint check (openapi.json -- no auth)
+ *   4. Public endpoint check (health, openapi.json -- no auth)
  *   5. Auth check (X-API-Key header)
  *   6. Rate limit check (per-key token bucket)
  *   7. Route dispatch (regex matching, Axon pattern)
@@ -23,12 +23,16 @@ import type { RelationshipStore } from '../relationships/store.js'
 import type { AxonRegistrationService } from '../registration/service.js'
 import type { NeuronProtocolServer } from '../routing/server.js'
 import type { AuditLogger } from '../audit/logger.js'
-import { sendJson } from './http-utils.js'
+import type { ConsentRelationshipStore } from '../consent/relationship-store.js'
+import { sendJson, readBody } from './http-utils.js'
 import { openapiSpec } from './openapi-spec.js'
 import { handleOrganization } from './routes/organization.js'
 import { handleRelationships, handleRelationshipById } from './routes/relationships.js'
 import { handleStatus } from './routes/status.js'
 import { handleOpenApi } from './routes/openapi.js'
+import { handleHealth } from './routes/health.js'
+import { handleRegistrations, handleRegistrationById, handleCreateRegistration } from './routes/registrations.js'
+import { handleConsentStatus } from './routes/consent-status.js'
 
 /** Dependencies injected into the API router and route handlers */
 export interface ApiRouterDeps {
@@ -40,10 +44,17 @@ export interface ApiRouterDeps {
   registrationService: AxonRegistrationService
   protocolServer: NeuronProtocolServer
   auditLogger?: AuditLogger
+  consentRelationshipStore?: ConsentRelationshipStore
 }
 
 /** Regex for GET /v1/relationships/:id */
 const RELATIONSHIP_BY_ID_RE = /^\/v1\/relationships\/([^/]+)$/
+
+/** Regex for GET /v1/registrations/:id */
+const REGISTRATION_BY_ID_RE = /^\/v1\/registrations\/([^/]+)$/
+
+/** Regex for GET /v1/consent/status/:relationship_id */
+const CONSENT_STATUS_RE = /^\/v1\/consent\/status\/([^/]+)$/
 
 /**
  * Set CORS headers on the response based on the request Origin and allowed origins config.
@@ -70,7 +81,7 @@ function setCorsHeaders(
     return
   }
 
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'X-API-Key, Content-Type')
   res.setHeader('Access-Control-Max-Age', '86400')
 }
@@ -79,8 +90,9 @@ function setCorsHeaders(
  * Create the REST API request handler.
  *
  * Returns a `(req, res) => void` function that can be attached to an HTTP
- * server's 'request' event. Non-API paths (not starting with /v1/ and not
- * /openapi.json) are silently ignored so WebSocket and other handlers work.
+ * server's 'request' event. Non-API paths (not starting with /v1/, not
+ * /openapi.json, and not /health) are silently ignored so WebSocket and
+ * other handlers work.
  */
 export function createApiRouter(
   deps: ApiRouterDeps,
@@ -93,7 +105,11 @@ export function createApiRouter(
       const method = req.method ?? 'GET'
 
       // 2. Ignore non-API paths (let other handlers deal with them)
-      if (!pathname.startsWith('/v1/') && pathname !== '/openapi.json') {
+      if (
+        !pathname.startsWith('/v1/') &&
+        pathname !== '/openapi.json' &&
+        pathname !== '/health'
+      ) {
         return
       }
 
@@ -107,7 +123,12 @@ export function createApiRouter(
         return
       }
 
-      // 4. Public endpoint check -- openapi.json needs no auth
+      // 4. Public endpoint checks -- health and openapi.json need no auth
+      if (pathname === '/health') {
+        handleHealth(res)
+        return
+      }
+
       if (pathname === '/openapi.json') {
         handleOpenApi(res, openapiSpec)
         return
@@ -156,7 +177,7 @@ export function createApiRouter(
         return
       }
 
-      // 7. Route dispatch (only GET allowed on all endpoints)
+      // 7. Audit the request
       if (deps.auditLogger) {
         deps.auditLogger.append({
           category: 'api_access',
@@ -165,6 +186,18 @@ export function createApiRouter(
         })
       }
 
+      // 8. Route dispatch
+
+      // POST /v1/registrations
+      if (method === 'POST' && pathname === '/v1/registrations') {
+        readBody(req).then(
+          (body) => handleCreateRegistration(res, deps, body),
+          () => sendJson(res, 400, { error: 'Failed to read request body' }),
+        )
+        return
+      }
+
+      // All remaining routes are GET-only
       if (method !== 'GET') {
         sendJson(res, 404, { error: 'Not found' })
         return
@@ -183,6 +216,23 @@ export function createApiRouter(
       const relationshipMatch = RELATIONSHIP_BY_ID_RE.exec(pathname)
       if (relationshipMatch) {
         handleRelationshipById(res, deps, relationshipMatch[1])
+        return
+      }
+
+      if (pathname === '/v1/registrations') {
+        handleRegistrations(res, deps)
+        return
+      }
+
+      const registrationMatch = REGISTRATION_BY_ID_RE.exec(pathname)
+      if (registrationMatch) {
+        handleRegistrationById(res, deps, registrationMatch[1])
+        return
+      }
+
+      const consentMatch = CONSENT_STATUS_RE.exec(pathname)
+      if (consentMatch) {
+        handleConsentStatus(res, deps, consentMatch[1])
         return
       }
 
