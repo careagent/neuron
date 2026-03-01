@@ -182,6 +182,77 @@ export const openapiSpec = {
         },
         required: ['provider_npi', 'provider_name', 'provider_types'],
       },
+      InjectaVoxPayload: {
+        type: 'object' as const,
+        properties: {
+          visit_id: { type: 'string' as const, format: 'uuid' },
+          provider_npi: { type: 'string' as const, pattern: '^\\d{10}$' },
+          patient_id: { type: 'string' as const },
+          visit_type: { type: 'string' as const, enum: ['in_person', 'telehealth', 'follow_up'] },
+          visit_date: { type: 'string' as const, format: 'date-time' },
+          chief_complaint: { type: 'string' as const },
+          clinical_notes: { type: 'string' as const },
+          vitals: {
+            type: 'object' as const,
+            properties: {
+              blood_pressure: { type: 'string' as const },
+              heart_rate: { type: 'number' as const },
+              temperature: { type: 'number' as const },
+              weight: { type: 'number' as const },
+              height: { type: 'number' as const },
+            },
+          },
+          assessment: { type: 'string' as const },
+          plan: { type: 'string' as const },
+          medications: {
+            type: 'array' as const,
+            items: {
+              type: 'object' as const,
+              properties: {
+                name: { type: 'string' as const },
+                dosage: { type: 'string' as const },
+                frequency: { type: 'string' as const },
+                route: { type: 'string' as const },
+              },
+              required: ['name', 'dosage', 'frequency', 'route'],
+            },
+          },
+          follow_up: {
+            type: 'object' as const,
+            properties: {
+              date: { type: 'string' as const, format: 'date-time' },
+              instructions: { type: 'string' as const },
+            },
+            required: ['date', 'instructions'],
+          },
+        },
+        required: [
+          'visit_id', 'provider_npi', 'patient_id', 'visit_type',
+          'visit_date', 'chief_complaint', 'clinical_notes',
+          'assessment', 'plan',
+        ],
+      },
+      InjectaVoxIngestResult: {
+        type: 'object' as const,
+        properties: {
+          visit_id: { type: 'string' as const },
+          provider_npi: { type: 'string' as const },
+          patient_id: { type: 'string' as const },
+          ingested_at: { type: 'string' as const, format: 'date-time' },
+          status: { type: 'string' as const, enum: ['ingested'] },
+        },
+        required: ['visit_id', 'provider_npi', 'patient_id', 'ingested_at', 'status'],
+      },
+      InjectaVoxVisitList: {
+        type: 'object' as const,
+        properties: {
+          data: { type: 'array' as const, items: { $ref: '#/components/schemas/InjectaVoxPayload' } },
+          total: { type: 'integer' as const },
+          limit: { type: 'integer' as const },
+          offset: { type: 'integer' as const },
+        },
+        required: ['data', 'total', 'limit', 'offset'],
+      },
     },
   },
   paths: {
@@ -537,6 +608,125 @@ export const openapiSpec = {
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/Status' },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          '429': {
+            description: 'Rate limit exceeded',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/injectavox/ingest': {
+      post: {
+        summary: 'Ingest clinical visit data',
+        description: 'InjectaVox pushes clinical visit data (notes, summaries, vitals) for provider agent consumption.',
+        operationId: 'injectaVoxIngest',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/InjectaVoxPayload' },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'Visit ingested',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/InjectaVoxIngestResult' },
+              },
+            },
+          },
+          '400': {
+            description: 'Validation error',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          '409': {
+            description: 'Duplicate visit_id',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+          '429': {
+            description: 'Rate limit exceeded',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/injectavox/visits/{provider_npi}': {
+      get: {
+        summary: 'List unprocessed visits for provider',
+        description: 'Returns unprocessed clinical visit data for a provider NPI.',
+        operationId: 'listInjectaVoxVisits',
+        parameters: [
+          {
+            name: 'provider_npi',
+            in: 'path' as const,
+            required: true,
+            schema: { type: 'string' as const, pattern: '^\\d{10}$' },
+            description: '10-digit provider NPI',
+          },
+          {
+            name: 'limit',
+            in: 'query' as const,
+            schema: { type: 'integer' as const, default: 50, maximum: 100 },
+            description: 'Pagination limit (max 100)',
+          },
+          {
+            name: 'offset',
+            in: 'query' as const,
+            schema: { type: 'integer' as const, default: 0 },
+            description: 'Pagination offset',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Paginated visit list',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/InjectaVoxVisitList' },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid NPI format',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' },
               },
             },
           },

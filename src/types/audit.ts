@@ -10,6 +10,7 @@ export const AuditCategorySchema = Type.Union([
   Type.Literal('sync'),
   Type.Literal('admin'),
   Type.Literal('termination'),
+  Type.Literal('ingestion'),
 ])
 
 export type AuditCategory = Static<typeof AuditCategorySchema>

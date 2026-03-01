@@ -24,6 +24,8 @@ import type { AxonRegistrationService } from '../registration/service.js'
 import type { NeuronProtocolServer } from '../routing/server.js'
 import type { AuditLogger } from '../audit/logger.js'
 import type { ConsentRelationshipStore } from '../consent/relationship-store.js'
+import type { InjectaVoxStore } from './injectavox-store.js'
+import type { InjectaVoxEventEmitter } from './injectavox-events.js'
 import { sendJson, readBody } from './http-utils.js'
 import { openapiSpec } from './openapi-spec.js'
 import { handleOrganization } from './routes/organization.js'
@@ -33,6 +35,7 @@ import { handleOpenApi } from './routes/openapi.js'
 import { handleHealth } from './routes/health.js'
 import { handleRegistrations, handleRegistrationById, handleCreateRegistration } from './routes/registrations.js'
 import { handleConsentStatus } from './routes/consent-status.js'
+import { handleInjectaVoxIngest, handleInjectaVoxVisits } from './routes/injectavox.js'
 
 /** Dependencies injected into the API router and route handlers */
 export interface ApiRouterDeps {
@@ -45,6 +48,9 @@ export interface ApiRouterDeps {
   protocolServer: NeuronProtocolServer
   auditLogger?: AuditLogger
   consentRelationshipStore?: ConsentRelationshipStore
+  injectaVoxStore?: InjectaVoxStore
+  injectaVoxEvents?: InjectaVoxEventEmitter
+  injectaVoxRateLimiter?: TokenBucketRateLimiter
 }
 
 /** Regex for GET /v1/relationships/:id */
@@ -55,6 +61,9 @@ const REGISTRATION_BY_ID_RE = /^\/v1\/registrations\/([^/]+)$/
 
 /** Regex for GET /v1/consent/status/:relationship_id */
 const CONSENT_STATUS_RE = /^\/v1\/consent\/status\/([^/]+)$/
+
+/** Regex for GET /v1/injectavox/visits/:provider_npi */
+const INJECTAVOX_VISITS_RE = /^\/v1\/injectavox\/visits\/([^/]+)$/
 
 /**
  * Set CORS headers on the response based on the request Origin and allowed origins config.
@@ -195,6 +204,55 @@ export function createApiRouter(
           () => sendJson(res, 400, { error: 'Failed to read request body' }),
         )
         return
+      }
+
+      // POST /v1/injectavox/ingest
+      if (method === 'POST' && pathname === '/v1/injectavox/ingest') {
+        if (!deps.injectaVoxStore || !deps.injectaVoxEvents) {
+          sendJson(res, 503, { error: 'InjectaVox ingestion not configured' })
+          return
+        }
+
+        // Apply InjectaVox-specific rate limiter if configured
+        if (deps.injectaVoxRateLimiter && !deps.injectaVoxRateLimiter.consume(keyRecord.key_id)) {
+          res.setHeader('Retry-After', String(deps.injectaVoxRateLimiter.retryAfter(keyRecord.key_id)))
+          sendJson(res, 429, { error: 'Ingestion rate limit exceeded' })
+          if (deps.auditLogger) {
+            deps.auditLogger.append({
+              category: 'ingestion',
+              action: 'rate_limited',
+              details: { method, path: pathname, key_id: keyRecord.key_id },
+            })
+          }
+          return
+        }
+
+        readBody(req).then(
+          (body) => handleInjectaVoxIngest(res, {
+            injectaVoxStore: deps.injectaVoxStore!,
+            injectaVoxEvents: deps.injectaVoxEvents!,
+            auditLogger: deps.auditLogger,
+          }, body),
+          () => sendJson(res, 400, { error: 'Failed to read request body' }),
+        )
+        return
+      }
+
+      // GET /v1/injectavox/visits/:provider_npi
+      if (method === 'GET') {
+        const injectaVoxMatch = INJECTAVOX_VISITS_RE.exec(pathname)
+        if (injectaVoxMatch) {
+          if (!deps.injectaVoxStore || !deps.injectaVoxEvents) {
+            sendJson(res, 503, { error: 'InjectaVox ingestion not configured' })
+            return
+          }
+          handleInjectaVoxVisits(res, {
+            injectaVoxStore: deps.injectaVoxStore,
+            injectaVoxEvents: deps.injectaVoxEvents,
+            auditLogger: deps.auditLogger,
+          }, injectaVoxMatch[1], searchParams)
+          return
+        }
       }
 
       // All remaining routes are GET-only

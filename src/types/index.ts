@@ -54,3 +54,21 @@ export type { TerminationRecord } from './termination.js'
 // Sync
 export { CachedChartEntrySchema, SyncStateSchema } from './sync.js'
 export type { CachedChartEntry, SyncState } from './sync.js'
+
+// InjectaVox
+export {
+  InjectaVoxPayloadSchema,
+  InjectaVoxVisitSchema,
+  VisitTypeSchema,
+  VitalsSchema,
+  MedicationSchema,
+  FollowUpSchema,
+} from './injectavox.js'
+export type {
+  InjectaVoxPayload,
+  InjectaVoxVisit,
+  VisitType,
+  Vitals,
+  Medication,
+  FollowUp,
+} from './injectavox.js'

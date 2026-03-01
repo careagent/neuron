@@ -203,6 +203,37 @@ export const migrations: Migration[] = [
         ON audit_log(timestamp);
     `,
   },
+  {
+    version: 8,
+    description: 'Create injectavox_visits table for clinical data ingestion',
+    up: `
+      CREATE TABLE IF NOT EXISTS injectavox_visits (
+        visit_id TEXT PRIMARY KEY,
+        provider_npi TEXT NOT NULL,
+        patient_id TEXT NOT NULL,
+        visit_type TEXT NOT NULL,
+        visit_date TEXT NOT NULL,
+        chief_complaint TEXT NOT NULL,
+        clinical_notes TEXT NOT NULL,
+        vitals TEXT,
+        assessment TEXT NOT NULL,
+        plan TEXT NOT NULL,
+        medications TEXT,
+        follow_up TEXT,
+        processed INTEGER NOT NULL DEFAULT 0,
+        ingested_at TEXT NOT NULL
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_injectavox_provider
+        ON injectavox_visits(provider_npi);
+      CREATE INDEX IF NOT EXISTS idx_injectavox_processed
+        ON injectavox_visits(processed);
+      CREATE INDEX IF NOT EXISTS idx_injectavox_patient
+        ON injectavox_visits(patient_id);
+      CREATE INDEX IF NOT EXISTS idx_injectavox_ingested
+        ON injectavox_visits(ingested_at);
+    `,
+  },
 ]
 
 /**
