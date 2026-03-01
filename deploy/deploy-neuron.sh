@@ -55,10 +55,26 @@ scp_cmd() {
   scp ${SSH_OPTS} "$@"
 }
 
+# Determine protocol — if AXON_DOMAIN/NEURON_DOMAIN already contain a protocol,
+# use it. Otherwise default to https:// for domain names, http:// for raw IPs.
+detect_url() {
+  local input="$1"
+  if [[ "$input" == http://* ]] || [[ "$input" == https://* ]]; then
+    echo "$input"
+  elif [[ "$input" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+    echo "http://$input"
+  else
+    echo "https://$input"
+  fi
+}
+
+AXON_URL="$(detect_url "$AXON_DOMAIN")"
+NEURON_URL="$(detect_url "$NEURON_DOMAIN")"
+
 echo "=== CareAgent Neuron Deployment ==="
 echo "Target: ${SSH_USER}@${VPS_NEURON_IP}"
-echo "Domain: ${NEURON_DOMAIN}"
-echo "Axon:   https://${AXON_DOMAIN}"
+echo "Neuron: ${NEURON_URL}"
+echo "Axon:   ${AXON_URL}"
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -94,6 +110,12 @@ fi
 # Create directories
 mkdir -p /opt/neuron/data /opt/neuron/dist
 chown -R neuron:neuron /opt/neuron
+
+# Open firewall for neuron port (idempotent)
+if command -v ufw &>/dev/null && ufw status | grep -q "Status: active"; then
+  ufw allow 3000/tcp >/dev/null 2>&1 || true
+  echo "  Firewall: port 3000 open"
+fi
 SETUP_EOF
 echo "  Remote environment ready."
 
@@ -102,13 +124,14 @@ echo "  Remote environment ready."
 # ---------------------------------------------------------------------------
 echo "[3/7] Transferring build artifacts..."
 
-# Create a temporary tarball of required files
+# Create a temporary tarball of required files (excluding node_modules —
+# native addons like better-sqlite3 must be built on the target platform)
 TARBALL=$(mktemp /tmp/neuron-deploy-XXXXXX.tar.gz)
 tar czf "${TARBALL}" \
   -C "${REPO_DIR}" \
   dist/ \
   package.json \
-  node_modules/ \
+  pnpm-lock.yaml \
   deploy/neuron.service
 
 scp_cmd "${TARBALL}" "${SSH_USER}@${VPS_NEURON_IP}:/tmp/neuron-deploy.tar.gz"
@@ -119,19 +142,27 @@ set -euo pipefail
 cd /opt/neuron
 tar xzf /tmp/neuron-deploy.tar.gz
 rm -f /tmp/neuron-deploy.tar.gz
+
+# Install dependencies on the target (rebuilds native addons for this platform)
+export CI=true
+if ! command -v pnpm &>/dev/null; then
+  npm install -g pnpm
+fi
+pnpm install --frozen-lockfile --prod
+
 chown -R neuron:neuron /opt/neuron
 TRANSFER_EOF
-echo "  Artifacts transferred."
+echo "  Artifacts transferred and dependencies installed."
 
 # ---------------------------------------------------------------------------
 # Step 4: Generate configuration
 # ---------------------------------------------------------------------------
 echo "[4/7] Generating configuration..."
 
-# shellcheck disable=SC2087
-ssh_cmd bash -s <<CONF_EOF
-set -euo pipefail
-cat > /opt/neuron/neuron.config.json <<'JSON_EOF'
+# Generate the config JSON locally and upload via scp (avoids heredoc
+# variable-expansion pitfalls with nested heredocs over SSH).
+CONF_TMP=$(mktemp /tmp/neuron-config-XXXXXX.json)
+cat > "${CONF_TMP}" <<EOF
 {
   "organization": {
     "npi": "${ORG_NPI}",
@@ -158,8 +189,8 @@ cat > /opt/neuron/neuron.config.json <<'JSON_EOF'
     "intervalMs": 60000
   },
   "axon": {
-    "registryUrl": "https://${AXON_DOMAIN}",
-    "endpointUrl": "https://${NEURON_DOMAIN}",
+    "registryUrl": "${AXON_URL}",
+    "endpointUrl": "${NEURON_URL}",
     "backoffCeilingMs": 300000
   },
   "api": {
@@ -172,10 +203,10 @@ cat > /opt/neuron/neuron.config.json <<'JSON_EOF'
     }
   }
 }
-JSON_EOF
-chown neuron:neuron /opt/neuron/neuron.config.json
-chmod 600 /opt/neuron/neuron.config.json
-CONF_EOF
+EOF
+scp_cmd "${CONF_TMP}" "${SSH_USER}@${VPS_NEURON_IP}:/opt/neuron/neuron.config.json"
+rm -f "${CONF_TMP}"
+ssh_cmd "chown neuron:neuron /opt/neuron/neuron.config.json && chmod 600 /opt/neuron/neuron.config.json"
 echo "  Configuration written."
 
 # ---------------------------------------------------------------------------
@@ -216,5 +247,5 @@ echo "[7/7] Running deployment verification..."
 
 echo ""
 echo "=== Deployment Complete ==="
-echo "Neuron is running at https://${NEURON_DOMAIN}"
-echo "Registered with Axon at https://${AXON_DOMAIN}"
+echo "Neuron is running at ${NEURON_URL}"
+echo "Registered with Axon at ${AXON_URL}"
