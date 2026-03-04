@@ -1,48 +1,42 @@
 # @careagent/neuron
 
-The organization-level trust anchor for the CareAgent network. Free, open-source infrastructure for any NPI-holding healthcare organization.
+> Source: [github.com/careagent/neuron](https://github.com/careagent/neuron)
+
+The front door for any organization on the CareAgent network. Free, open-source infrastructure for any organization participating in the healthcare ecosystem — hospitals, practices, medical boards, specialty societies, federal agencies, and more.
 
 ## Why
 
-Every healthcare organization needs a way for patient CareAgents to establish consent and connect with provider CareAgents. The Neuron handles the one-time consent handshake — verifying the patient's consent token, creating the relationship record, exchanging direct addresses between patient and provider CareAgents — then steps out. All clinical communication flows peer-to-peer after the handshake. No PHI ever touches the Neuron.
+Every organization participating in the healthcare ecosystem needs a presence on the CareAgent network. Clinical organizations need infrastructure enabling patient CareAgents to connect with provider CareAgents. Administrative organizations — state medical boards, specialty certification bodies, federal agencies — need to expose licensing, credentialing, certification, and regulatory services to the network. The Neuron provides this presence through a uniform protocol regardless of what the organization does.
 
-The Neuron is free. Charging for organizational infrastructure would exclude the small practices and rural clinics that need it most.
+For clinical organizations, the Neuron handles patient-to-provider routing — authenticating inbound connections, matching patients to available provider CareAgent copies, establishing peer-to-peer connections, and then exiting the communication path. All subsequent clinical communication flows directly between parties. The system ensures no Protected Health Information touches the Neuron itself.
 
-## What It Does
+For administrative organizations, the Neuron exposes organizational capabilities through its MCP surface — licensing verification, complaint filing, certification status, document repositories, and any other service the organization chooses to offer.
 
-- **Trust brokering** — Accepts inbound WebSocket connections from patient CareAgents, verifies Ed25519 consent tokens, creates relationship records, exchanges direct P2P addresses between patient and provider CareAgents, then disconnects
-- **Patient directory** — Stores patient CareAgent identifiers, demographics, and consent records for consented relationships (never PHI)
-- **Axon registration** — Registers the organization and its providers with the national Axon network using NPI as the universal identifier
-- **API gateway** — Exposes a REST API for third-party applications (scheduling tools, billing systems, documentation tools, pharmacy agents) to reach consented patient CareAgents directly
-- **Local discovery** — mDNS/DNS-SD advertisement for patient CareAgents on the local network
-- **Audit trail** — Hash-chained JSONL log for every operational event (consent, registration, termination)
+It's offered freely because charging for organizational infrastructure would exclude smaller practices and rural clinics most needing such tools.
 
-## What It Does Not Do
+## Core Functionality
 
-- Store or transit clinical data (diagnoses, lab results, prescriptions, treatment notes)
-- Relay messages between CareAgents after the handshake
-- House scheduling or billing data (third-party apps handle this through the API)
-- Stay in the communication path after consent establishment
-- Replace an EMR
+- **Gateway**: Authenticates inbound CareAgent connections using Ed25519 token verification
+- **Provider routing**: Maintains awareness of provider CareAgent copies and their availability, matches inbound patients to available copies
+- **P2P brokering**: Establishes peer-to-peer connection between patient and provider CareAgents, then exits the communication path
+- **Busy-path handling**: When no provider copy is available, supports callback or retry patterns (design TBD)
+- **MCP surface**: Exposes organization-specific capabilities — clinical routing, licensing verification, document repositories, complaint filing, or any other service the organization chooses to offer
+- **Axon registration**: Registers with the network directory so CareAgents can discover the organization
+- **Audit logging**: Hash-chained JSONL records of operational events
+
+## What It Excludes
+
+The system deliberately does not: store or transmit clinical data, relay messages after P2P is established, house billing information, remain in communication paths after connection, replace EMR systems, classify or triage patient requests (future consideration only), or store PHI in any form.
 
 ## Architecture
 
-```
-                    Axon Network
-                         |
-                      Neuron          <-- trust broker, steps out after handshake
-                    /    |    \
-          Third-party  Patient    Provider
-             Apps     CareAgent   CareAgent
-                         \         /
-                      Direct P2P after consent
-```
+The Neuron is the front door to an organization on the CareAgent network. Different organizations expose different capabilities behind the same protocol. A hospital's Neuron routes patient-to-provider connections and may integrate with legacy systems. A state medical board's Neuron exposes licensing records and complaint filing. A specialty society's Neuron provides certification status and MOC requirements. The protocol is uniform — what's behind the door is not.
 
-The Neuron is the organization's membrane to the Axon network. Patient CareAgents connect once to establish consent. After the handshake, everyone knows how to reach everyone else — patient CareAgent talks directly to provider CareAgent, third-party apps reach patient CareAgents directly — until the patient revokes consent or the organization bans the patient.
+Organizations scale provider availability by running multiple copies of a given provider's CareAgent. The Neuron's routing layer knows how many copies exist and which are available, matching inbound patient connections to free copies. When all copies are busy, the Neuron supports callback or retry patterns so it does not become a persistent connection holder.
 
-Any NPI-holding organization can run a Neuron: medical practices, hospitals, pharmacies, imaging centers, laboratories, urgent care facilities, specialty clinics.
+Any organization participating in the healthcare ecosystem can operate a Neuron — practices, hospitals, pharmacies, labs, medical boards, specialty societies, and federal agencies.
 
-## Install
+## Installation & Usage
 
 ```bash
 git clone https://github.com/careagent/neuron
@@ -51,88 +45,21 @@ pnpm install
 pnpm build
 ```
 
-## Usage
+Commands include `neuron init`, `neuron start`, provider management (`add`, `list`, `remove`), and status checking.
 
-```bash
-# Initialize and register with Axon
-neuron init
+## Technical Stack
 
-# Start the Neuron
-neuron start
+- **Runtime**: Node.js ≥20.19.0
+- **Language**: TypeScript ~5.7.x
+- **Build**: tsdown ~0.20.x
+- **Testing**: vitest ~4.0.x
+- **Schema**: @sinclair/typebox
+- **Storage**: SQLite via better-sqlite3
+- **License**: Apache 2.0
 
-# Manage providers
-neuron provider add <npi>
-neuron provider list
-neuron provider remove <npi>
+## Related Projects
 
-# Check status
-neuron status
-```
-
-## Development
-
-```bash
-pnpm dev          # Run in development mode
-pnpm test         # Run tests
-pnpm test:watch   # Watch mode
-pnpm test:coverage # Coverage report
-pnpm lint         # Type check
-```
-
-All development uses synthetic data. No real patient data or PHI at any stage.
-
-## Project Structure
-
-```
-src/
-├── index.ts            # Package entry point
-├── audit/              # Hash-chained JSONL audit logging
-├── cli/                # CLI commands (init, start, stop, status, provider)
-├── config/             # TypeBox config schema, loader, env overrides
-├── consent/            # Ed25519 token verification, challenge-response
-├── ipc/                # Unix domain socket IPC (CLI ↔ server)
-├── registration/       # Axon registration, heartbeat, state persistence
-├── relationships/      # Relationship store, handshake handler, termination
-├── storage/            # SQLite engine with migrations
-├── types/              # TypeBox schemas for all data models
-└── validators/         # NPI Luhn validation
-```
-
-## Tech Stack
-
-| Layer | Choice |
-|-------|--------|
-| Runtime | Node.js >=20.19.0 |
-| Language | TypeScript ~5.7.x |
-| Build | tsdown ~0.20.x |
-| Test | vitest ~4.0.x (80% coverage) |
-| Schema | @sinclair/typebox ~0.34.x |
-| HTTP | Node.js built-in `http` module |
-| Storage | SQLite via better-sqlite3 |
-| CLI | Commander |
-| License | Apache 2.0 |
-
-## Roadmap
-
-- [x] Phase 1: Foundation (config, audit, storage, types, CLI, NPI validation)
-- [ ] Phase 2: Axon Registration (organization/provider registration, heartbeat)
-- [x] Phase 3: Consent and Relationships (Ed25519 verification, relationship store, termination)
-- [ ] Phase 4: WebSocket Routing (consent handshake, address exchange, broker-and-step-out)
-- [ ] Phase 5: Local Discovery (mDNS/DNS-SD)
-- [ ] Phase 6: Scheduling and Billing (API gateway for third-party apps)
-- [ ] Phase 7: REST API (third-party HTTP API with auth and OpenAPI spec)
-- [ ] Phase 8: Patient Chart Sync (incremental sync with revocation)
-- [ ] Phase 9: Integration and Documentation (E2E tests, reference docs)
-
-## Related Repositories
-
-| Repository | Purpose |
-|-----------|---------|
-| [@careagent/axon](https://github.com/careagent/axon) | Open foundation network — discovery, handshake protocol, registry |
-| [@careagent/provider-core](https://github.com/careagent/provider-core) | Provider-side CareAgent — registers with and communicates through the Neuron |
-| [@careagent/patient-core](https://github.com/careagent/patient-core) | Patient-side CareAgent — connects to the Neuron to establish consent |
-| [@careagent/patient-chart](https://github.com/careagent/patient-chart) | Patient Chart vault — immutable clinical record owned by the patient |
-
-## License
-
-Apache 2.0. See [LICENSE](LICENSE).
+- @careagent/axon: Network directory and registry
+- @careagent/provider-core: Provider-side agents
+- @careagent/patient-core: Patient-side agents
+- @careagent/patient-chart: Patient-controlled records vault
