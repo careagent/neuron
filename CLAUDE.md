@@ -111,3 +111,19 @@ The verifier checks the Ed25519 signature against the patient's public key. The 
 ### REST API
 
 Routes: `/status`, `/relationships`, `/organization`, `/openapi`. API key authentication with SHA-256 hashed keys stored in SQLite.
+
+### A2A Protocol Integration (Planned)
+
+Neuron is becoming a **conformant A2A Server**. This means:
+
+- **A2A Server** -- JSON-RPC 2.0 over HTTPS implementing `SendMessage`, `SendStreamingMessage`, `GetTask`, `CancelTask`
+- **Agent Card publishing** -- generate and serve Agent Card at `/.well-known/agent.json`
+- **Provider routing** -- mapped to A2A Task assignment
+- **SSE streaming** -- real-time status updates for active Tasks
+- **Push notifications** -- support for async Task completion
+- **Axon registration** -- register Agent Card with Axon's Agent Card registry
+- **MCP preserved** -- existing MCP surface maintained alongside A2A endpoints
+
+The existing WebSocket consent handshake, mDNS discovery, and REST API remain functional. A2A adds a new transport layer alongside them.
+
+**SDK:** `@a2a-js/sdk` (v0.3.10, published by Google). Wrap in an adapter layer to insulate from pre-1.0 API changes.

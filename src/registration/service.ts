@@ -16,14 +16,17 @@ import { HeartbeatManager, writeHealthFile } from './heartbeat.js'
 
 export class AxonRegistrationService {
   private client!: AxonClient
-  private stateStore!: RegistrationStateStore
+  private stateStore: RegistrationStateStore
   private heartbeat!: HeartbeatManager
 
   constructor(
     private readonly config: NeuronConfig,
     private readonly storage: StorageEngine,
     private readonly auditLogger?: AuditLogger,
-  ) {}
+  ) {
+    // Initialize stateStore eagerly so listProviders() works before start()
+    this.stateStore = new RegistrationStateStore(storage)
+  }
 
   /**
    * Start the registration service.
@@ -37,7 +40,6 @@ export class AxonRegistrationService {
    */
   async start(): Promise<void> {
     this.client = new AxonClient(this.config.axon.registryUrl)
-    this.stateStore = new RegistrationStateStore(this.storage)
 
     const existingState = this.stateStore.load()
     const dataDir = dirname(this.config.storage.path)

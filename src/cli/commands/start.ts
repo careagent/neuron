@@ -11,6 +11,7 @@ import { RelationshipStore, TerminationHandler, ConsentHandshakeHandler } from '
 import { NeuronProtocolServer, createConnectionHandler } from '../../routing/index.js'
 import { DiscoveryService } from '../../discovery/index.js'
 import { ApiKeyStore, TokenBucketRateLimiter, createApiRouter } from '../../api/index.js'
+import { A2AServer, generateAgentCard } from '../../a2a/index.js'
 import type { IpcCommand, IpcResponse } from '../../ipc/index.js'
 import { output } from '../output.js'
 
@@ -185,6 +186,23 @@ export function registerStartCommand(program: Command): void {
         config.api.rateLimit.windowMs,
       )
 
+      // 6b. Initialize A2A server and Agent Card
+      const a2aServer = new A2AServer({ auditLogger, protocolServer })
+
+      const host = config.server.host === '0.0.0.0' ? getLocalAddress() : config.server.host
+      const agentCard = generateAgentCard({
+        config,
+        organizationName: config.organization.name,
+        organizationNpi: config.organization.npi,
+        endpoint: config.axon.endpointUrl || `http://${host}:${config.server.port}`,
+        providers: registrationService.listProviders().map((p) => ({
+          npi: p.provider_npi,
+          name: p.provider_name ?? p.provider_npi,
+          specialty: p.specialty ?? undefined,
+          provider_type: p.provider_types?.[0] ?? undefined,
+        })),
+      })
+
       const apiRouter = createApiRouter({
         config,
         storage,
@@ -194,6 +212,8 @@ export function registerStartCommand(program: Command): void {
         registrationService,
         protocolServer,
         auditLogger,
+        a2aServer,
+        agentCard,
       })
 
       // Attach to existing HTTP server (from NeuronProtocolServer)

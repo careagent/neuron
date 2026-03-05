@@ -26,6 +26,9 @@ import type { AuditLogger } from '../audit/logger.js'
 import type { ConsentRelationshipStore } from '../consent/relationship-store.js'
 import type { InjectaVoxStore } from './injectavox-store.js'
 import type { InjectaVoxEventEmitter } from './injectavox-events.js'
+import type { AgentCard } from '@careagent/a2a-types'
+import type { A2AServer } from '../a2a/server.js'
+import { handleA2ARequest, handleAgentCard, handleA2AStream } from '../a2a/routes.js'
 import { sendJson, readBody } from './http-utils.js'
 import { openapiSpec } from './openapi-spec.js'
 import { handleOrganization } from './routes/organization.js'
@@ -51,6 +54,8 @@ export interface ApiRouterDeps {
   injectaVoxStore?: InjectaVoxStore
   injectaVoxEvents?: InjectaVoxEventEmitter
   injectaVoxRateLimiter?: TokenBucketRateLimiter
+  a2aServer?: A2AServer
+  agentCard?: AgentCard
 }
 
 /** Regex for GET /v1/relationships/:id */
@@ -113,7 +118,35 @@ export function createApiRouter(
       const { pathname, searchParams } = url
       const method = req.method ?? 'GET'
 
-      // 2. Ignore non-API paths (let other handlers deal with them)
+      // 2a. A2A public endpoints (no auth required, not under /v1/)
+      if (pathname === '/.well-known/agent.json' && method === 'GET') {
+        if (deps.agentCard) {
+          handleAgentCard(res, deps.agentCard)
+        } else {
+          sendJson(res, 404, { error: 'Agent Card not configured' })
+        }
+        return
+      }
+
+      if (pathname === '/a2a' && method === 'POST') {
+        if (deps.a2aServer) {
+          handleA2ARequest(req, res, deps.a2aServer)
+        } else {
+          sendJson(res, 503, { error: 'A2A server not configured' })
+        }
+        return
+      }
+
+      if (pathname === '/a2a/stream' && method === 'POST') {
+        if (deps.a2aServer) {
+          handleA2AStream(req, res, deps.a2aServer)
+        } else {
+          sendJson(res, 503, { error: 'A2A server not configured' })
+        }
+        return
+      }
+
+      // 2b. Ignore non-API paths (let other handlers deal with them)
       if (
         !pathname.startsWith('/v1/') &&
         pathname !== '/openapi.json' &&

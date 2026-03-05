@@ -37,6 +37,7 @@
     "npi"
   ],
   "dependencies": {
+    "@careagent/a2a-types": "file:../shared",
     "@sinclair/typebox": "^0.34.48",
     "better-sqlite3": "^12.6.2",
     "bonjour-service": "^1.3.0",
