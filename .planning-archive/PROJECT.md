@@ -62,9 +62,17 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 - ✓ Architecture guide with Mermaid diagrams (docs/architecture.md) — v1.0
 - ✓ Configuration reference (docs/configuration.md) — v1.0
 
+### Validated (Post-v1.0)
+
+- ✓ Consent Broker with hash-chained Ed25519-signed audit log, relationship store, challenge/verifier — post-v1.0
+- ✓ Pure Node.js mDNS/DNS-SD replacing bonjour-service (RFC 1035 codec, UDP multicast, TTL cache) — post-v1.0
+- ✓ InjectaVox clinical data ingestion API (POST ingest, GET visits/:npi, event emitter) — post-v1.0
+- ✓ REST API expansion: GET /health, GET/POST /v1/registrations, GET /v1/consent/status/:id — post-v1.0
+- ✓ Deploy script hardening: protocol detection, native addon rebuild, firewall automation — post-v1.0
+
 ### Active
 
-(None — all v1.0 requirements shipped. Next milestone TBD via `/gsd:new-milestone`.)
+(None — all v1.0 + post-v1.0 requirements shipped. Next milestone TBD via `/gsd:new-milestone`.)
 
 ### Out of Scope
 
@@ -88,9 +96,9 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 
 ## Context
 
-**Shipped v1.0 MVP** with 11,147 LOC TypeScript, 239 tests (17 test files), 115 commits over 4 days. Live-tested against Axon at https://axon.opencare.ai — Neuron registered, provider added, heartbeat healthy.
+**Shipped v1.0 MVP** with 11,147 LOC TypeScript, 239 tests (17 test files), 115 commits over 4 days. Live-tested against Axon at https://axon.opencare.ai — Neuron registered, provider added, heartbeat healthy. **Post-v1.0:** ~48K LOC, 300+ tests (23+ test files), 129 commits. Added consent broker, pure mDNS, InjectaVox ingestion, REST expansion.
 
-**Tech stack:** Node.js >=22.12.0, TypeScript ~5.7.x, pnpm, tsdown, vitest, better-sqlite3, ws, bonjour-service, @sinclair/typebox.
+**Tech stack:** Node.js >=22.12.0, TypeScript ~5.7.x, pnpm, tsdown, vitest, better-sqlite3, ws, @sinclair/typebox. mDNS via pure Node.js implementation (replaced bonjour-service).
 
 **Ecosystem position:** Neuron sits between Axon (national network) above and provider CareAgents below. Patient CareAgents connect inbound via WebSocket. Third-party apps connect via REST API. Local network agents discover via mDNS.
 
@@ -145,6 +153,9 @@ Every NPI-holding organization can connect to the CareAgent network through a fr
 | api_access audit inline in router | Not middleware; direct inline placement at audit trigger points | ✓ Good — explicit audit points |
 | Named import for bonjour-service | tsdown bundles default import as module object; `{ Bonjour }` named import works in both vitest and tsdown | ✓ Good — fixed runtime crash |
 | Provider registration payload with name/types | Axon requires provider_name and provider_types; added CLI options, migration v5, full chain threading | ✓ Good — live-tested against Axon |
+| Replace bonjour-service with pure Node.js mDNS | Eliminates runtime dependency; full control over RFC 1035 packet codec, UDP multicast, TTL caching | ✓ Good — zero external mDNS deps |
+| Consent Broker as separate subsystem | Dedicated broker with its own Ed25519-signed hash-chained audit log, relationship store, and challenge/verifier | ✓ Good — clean separation from v1.0 consent |
+| InjectaVox ingestion pattern | Clinical data ingestion via POST /v1/injectavox/ingest with event emitter for notifications; migration v8 | ✓ Good — extensible ingestion model |
 
 ---
-*Last updated: 2026-02-22 after v1.0 live deployment*
+*Last updated: 2026-03-02 after post-v1.0 audit*
