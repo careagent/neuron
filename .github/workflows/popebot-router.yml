@@ -48,49 +48,76 @@ jobs:
               ;;
           esac
 
-          echo "Triggering $ROLE for $REPO#$ISSUE_NUMBER via label '$LABEL'"
-
-          # Build the prompt with full issue context
-          PROMPT="Work on issue #${ISSUE_NUMBER} in repository ${REPO}.
-
-          Issue URL: ${ISSUE_URL}
-
-          To get the full issue and comments, run:
-          gh issue view ${ISSUE_NUMBER} --repo ${REPO} --comments
-
-          Triggered by label: ${LABEL}"
-
-          # Send to PopeBot
-          HTTP_STATUS=$(curl -s -o /tmp/popebot_response.json -w "%{http_code}" \
-            -X POST "$WEBHOOK_URL" \
-            -H "x-api-key: $POPEBOT_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d "$(jq -n \
-              --arg prompt "$PROMPT" \
-              --arg repo "$REPO" \
-              --argjson issue_number "$ISSUE_NUMBER" \
-              --arg issue_url "$ISSUE_URL" \
-              --arg label "$LABEL" \
-              --arg role "$ROLE" \
-              '{
-                prompt: $prompt,
-                repo: $repo,
-                issue_number: $issue_number,
-                issue_url: $issue_url,
-                label: $label,
-                role: $role
-              }'
-            )")
-
-          echo "PopeBot responded with HTTP $HTTP_STATUS"
-          cat /tmp/popebot_response.json
-
-          if [ "$HTTP_STATUS" = "429" ]; then
-            echo "::warning::PopeBot $ROLE role is at max concurrency — agent not started"
-            exit 0
-          elif [ "$HTTP_STATUS" != "200" ]; then
-            echo "::error::PopeBot webhook failed with HTTP $HTTP_STATUS"
+          # Verify secrets are populated
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "::error::POPEBOT webhook URL secret is empty for role $ROLE"
+            exit 1
+          fi
+          if [ -z "$POPEBOT_API_KEY" ]; then
+            echo "::error::POPEBOT_API_KEY secret is empty"
             exit 1
           fi
 
-          echo "Successfully triggered $ROLE agent for $REPO#$ISSUE_NUMBER"
+          echo "Triggering $ROLE for $REPO#$ISSUE_NUMBER via label '$LABEL'"
+          echo "Webhook URL length: ${#WEBHOOK_URL} chars"
+
+          # Build the prompt with full issue context
+          PROMPT="Work on issue #${ISSUE_NUMBER} in repository ${REPO}.
+          Issue URL: ${ISSUE_URL}
+          To get the full issue and comments, run:
+          gh issue view ${ISSUE_NUMBER} --repo ${REPO} --comments
+          Triggered by label: ${LABEL}"
+
+          # Build JSON payload
+          PAYLOAD=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg repo "$REPO" \
+            --argjson issue_number "$ISSUE_NUMBER" \
+            --arg issue_url "$ISSUE_URL" \
+            --arg label "$LABEL" \
+            --arg role "$ROLE" \
+            '{
+              prompt: $prompt,
+              repo: $repo,
+              issue_number: $issue_number,
+              issue_url: $issue_url,
+              label: $label,
+              role: $role
+            }')
+
+          # Send to PopeBot with retry logic
+          MAX_RETRIES=3
+          RETRY=0
+          while [ $RETRY -lt $MAX_RETRIES ]; do
+            HTTP_STATUS=$(curl -s -o /tmp/popebot_response.json -w "%{http_code}" \
+              --connect-timeout 30 \
+              --max-time 60 \
+              -X POST "$WEBHOOK_URL" \
+              -H "x-api-key: $POPEBOT_API_KEY" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD")
+
+            if [ "$HTTP_STATUS" != "000" ]; then
+              break
+            fi
+
+            RETRY=$((RETRY + 1))
+            echo "Connection failed (attempt $RETRY/$MAX_RETRIES) — retrying in 10s..."
+            sleep 10
+          done
+
+          echo "PopeBot responded with HTTP $HTTP_STATUS"
+          cat /tmp/popebot_response.json 2>/dev/null || true
+
+          if [ "$HTTP_STATUS" = "000" ]; then
+            echo "::error::Could not connect to PopeBot after $MAX_RETRIES attempts"
+            exit 1
+          elif [ "$HTTP_STATUS" = "429" ]; then
+            echo "::warning::PopeBot $ROLE role is at max concurrency — agent not started"
+            exit 0
+          elif [ "$HTTP_STATUS" = "200" ]; then
+            echo "Successfully triggered $ROLE agent for $REPO#$ISSUE_NUMBER"
+          else
+            echo "::error::PopeBot webhook failed with HTTP $HTTP_STATUS"
+            exit 1
+          fi
