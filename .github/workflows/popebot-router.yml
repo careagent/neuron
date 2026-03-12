@@ -1,123 +1,74 @@
-name: PopeBot Cluster Router
+name: Label Webhook
+
 on:
   issues:
     types: [labeled]
 
 jobs:
-  route-to-popebot:
+  notify:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Route label to PopeBot role
+      - name: Look up webhook URL and fire
         env:
+          ALL_VARS: ${{ toJson(vars) }}
           POPEBOT_API_KEY: ${{ secrets.POPEBOT_API_KEY }}
-          POPEBOT_ARCHITECT_WEBHOOK: ${{ secrets.POPEBOT_ARCHITECT_WEBHOOK }}
-          POPEBOT_SECURITY_WEBHOOK: ${{ secrets.POPEBOT_SECURITY_WEBHOOK }}
-          POPEBOT_CLINICAL_WEBHOOK: ${{ secrets.POPEBOT_CLINICAL_WEBHOOK }}
-          POPEBOT_INTEGRATION_WEBHOOK: ${{ secrets.POPEBOT_INTEGRATION_WEBHOOK }}
-          POPEBOT_DEVELOPER_WEBHOOK: ${{ secrets.POPEBOT_DEVELOPER_WEBHOOK }}
         run: |
           LABEL="${{ github.event.label.name }}"
-          ISSUE_NUMBER="${{ github.event.issue.number }}"
-          REPO="${{ github.repository }}"
-          ISSUE_URL="${{ github.event.issue.html_url }}"
 
-          case "$LABEL" in
-            "plan")
-              WEBHOOK_URL="$POPEBOT_ARCHITECT_WEBHOOK"
-              ROLE="Architect"
-              ;;
-            "security-review")
-              WEBHOOK_URL="$POPEBOT_SECURITY_WEBHOOK"
-              ROLE="Security"
-              ;;
-            "clinical-review")
-              WEBHOOK_URL="$POPEBOT_CLINICAL_WEBHOOK"
-              ROLE="Clinical"
-              ;;
-            "integration-review")
-              WEBHOOK_URL="$POPEBOT_INTEGRATION_WEBHOOK"
-              ROLE="Integration"
-              ;;
-            "code")
-              WEBHOOK_URL="$POPEBOT_DEVELOPER_WEBHOOK"
-              ROLE="Developer"
-              ;;
-            *)
-              echo "Label '$LABEL' does not trigger PopeBot — skipping"
-              exit 0
-              ;;
-          esac
+          # Normalize label to variable name: "plan" → "PLAN_WEBHOOK_URL"
+          VAR_NAME=$(echo "$LABEL" | tr '[:lower:]' '[:upper:]' | sed 's/[^A-Z0-9]/_/g')
+          WEBHOOK_VAR="${VAR_NAME}_WEBHOOK_URL"
 
-          # Verify secrets are populated
+          echo "Label added: '$LABEL' → looking for variable: $WEBHOOK_VAR"
+
+          WEBHOOK_URL=$(echo "$ALL_VARS" | jq -r --arg key "$WEBHOOK_VAR" '.[$key] // empty')
+
           if [ -z "$WEBHOOK_URL" ]; then
-            echo "::error::POPEBOT webhook URL secret is empty for role $ROLE"
-            exit 1
-          fi
-          if [ -z "$POPEBOT_API_KEY" ]; then
-            echo "::error::POPEBOT_API_KEY secret is empty"
-            exit 1
-          fi
-
-          echo "Triggering $ROLE for $REPO#$ISSUE_NUMBER via label '$LABEL'"
-          echo "Webhook URL length: ${#WEBHOOK_URL} chars"
-
-          # Build the prompt with full issue context
-          PROMPT="Work on issue #${ISSUE_NUMBER} in repository ${REPO}.
-          Issue URL: ${ISSUE_URL}
-          To get the full issue and comments, run:
-          gh issue view ${ISSUE_NUMBER} --repo ${REPO} --comments
-          Triggered by label: ${LABEL}"
-
-          # Build JSON payload
-          PAYLOAD=$(jq -n \
-            --arg prompt "$PROMPT" \
-            --arg repo "$REPO" \
-            --argjson issue_number "$ISSUE_NUMBER" \
-            --arg issue_url "$ISSUE_URL" \
-            --arg label "$LABEL" \
-            --arg role "$ROLE" \
-            '{
-              prompt: $prompt,
-              repo: $repo,
-              issue_number: $issue_number,
-              issue_url: $issue_url,
-              label: $label,
-              role: $role
-            }')
-
-          # Send to PopeBot with retry logic
-          MAX_RETRIES=3
-          RETRY=0
-          while [ $RETRY -lt $MAX_RETRIES ]; do
-            HTTP_STATUS=$(curl -s -o /tmp/popebot_response.json -w "%{http_code}" \
-              --connect-timeout 30 \
-              --max-time 60 \
-              -X POST "$WEBHOOK_URL" \
-              -H "x-api-key: $POPEBOT_API_KEY" \
-              -H "Content-Type: application/json" \
-              -d "$PAYLOAD")
-
-            if [ "$HTTP_STATUS" != "000" ]; then
-              break
-            fi
-
-            RETRY=$((RETRY + 1))
-            echo "Connection failed (attempt $RETRY/$MAX_RETRIES) — retrying in 10s..."
-            sleep 10
-          done
-
-          echo "PopeBot responded with HTTP $HTTP_STATUS"
-          cat /tmp/popebot_response.json 2>/dev/null || true
-
-          if [ "$HTTP_STATUS" = "000" ]; then
-            echo "::error::Could not connect to PopeBot after $MAX_RETRIES attempts"
-            exit 1
-          elif [ "$HTTP_STATUS" = "429" ]; then
-            echo "::warning::PopeBot $ROLE role is at max concurrency — agent not started"
+            echo "No variable '$WEBHOOK_VAR' found — skipping"
             exit 0
-          elif [ "$HTTP_STATUS" = "200" ]; then
-            echo "Successfully triggered $ROLE agent for $REPO#$ISSUE_NUMBER"
-          else
-            echo "::error::PopeBot webhook failed with HTTP $HTTP_STATUS"
-            exit 1
           fi
+
+          echo "Firing webhook for label '$LABEL' → $WEBHOOK_URL"
+
+          # Payload variables — these names match the JSON keys exactly
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          OWNER="${{ github.repository_owner }}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          BRANCH="${{ github.event.repository.default_branch }}"
+          GITHUB_WF="Label Webhook"
+
+          # Look up optional prompt variable (e.g. PLAN_PROMPT)
+          PROMPT_VAR="${VAR_NAME}_PROMPT"
+          PROMPT=$(echo "$ALL_VARS" | jq -r --arg key "$PROMPT_VAR" '.[$key] // empty')
+
+          # Substitute payload variables into prompt template
+          if [ -n "$PROMPT" ]; then
+            PROMPT=$(echo "$PROMPT" | sed \
+              -e "s|{{ISSUE_NUMBER}}|${ISSUE_NUMBER}|g" \
+              -e "s|{{LABEL}}|${LABEL}|g" \
+              -e "s|{{OWNER}}|${OWNER}|g" \
+              -e "s|{{REPO}}|${REPO}|g" \
+              -e "s|{{BRANCH}}|${BRANCH}|g" \
+              -e "s|{{GITHUB_WORKFLOW}}|${GITHUB_WF}|g")
+          fi
+
+          # Build base payload
+          PAYLOAD=$(jq -n \
+            --argjson issue_number "$ISSUE_NUMBER" \
+            --arg label "$LABEL" \
+            --arg owner "$OWNER" \
+            --arg repo "$REPO" \
+            --arg branch "$BRANCH" \
+            --arg github_workflow "$GITHUB_WF" \
+            '{issue_number: $issue_number, label: $label, owner: $owner, repo: $repo, branch: $branch, github_workflow: $github_workflow}')
+
+          # Add prompt only if configured
+          if [ -n "$PROMPT" ]; then
+            PAYLOAD=$(echo "$PAYLOAD" | jq --arg prompt "$PROMPT" '. + {prompt: $prompt}')
+          fi
+
+          curl -s -X POST "$WEBHOOK_URL" \
+            -H "x-api-key: $POPEBOT_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD"
