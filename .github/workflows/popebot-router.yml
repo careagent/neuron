@@ -1,0 +1,96 @@
+name: PopeBot Cluster Router
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  route-to-popebot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Route label to PopeBot role
+        env:
+          POPEBOT_API_KEY: ${{ secrets.POPEBOT_API_KEY }}
+          POPEBOT_ARCHITECT_WEBHOOK: ${{ secrets.POPEBOT_ARCHITECT_WEBHOOK }}
+          POPEBOT_SECURITY_WEBHOOK: ${{ secrets.POPEBOT_SECURITY_WEBHOOK }}
+          POPEBOT_CLINICAL_WEBHOOK: ${{ secrets.POPEBOT_CLINICAL_WEBHOOK }}
+          POPEBOT_INTEGRATION_WEBHOOK: ${{ secrets.POPEBOT_INTEGRATION_WEBHOOK }}
+          POPEBOT_DEVELOPER_WEBHOOK: ${{ secrets.POPEBOT_DEVELOPER_WEBHOOK }}
+        run: |
+          LABEL="${{ github.event.label.name }}"
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+          REPO="${{ github.repository }}"
+          ISSUE_URL="${{ github.event.issue.html_url }}"
+
+          case "$LABEL" in
+            "plan")
+              WEBHOOK_URL="$POPEBOT_ARCHITECT_WEBHOOK"
+              ROLE="Architect"
+              ;;
+            "security-review")
+              WEBHOOK_URL="$POPEBOT_SECURITY_WEBHOOK"
+              ROLE="Security"
+              ;;
+            "clinical-review")
+              WEBHOOK_URL="$POPEBOT_CLINICAL_WEBHOOK"
+              ROLE="Clinical"
+              ;;
+            "integration-review")
+              WEBHOOK_URL="$POPEBOT_INTEGRATION_WEBHOOK"
+              ROLE="Integration"
+              ;;
+            "code")
+              WEBHOOK_URL="$POPEBOT_DEVELOPER_WEBHOOK"
+              ROLE="Developer"
+              ;;
+            *)
+              echo "Label '$LABEL' does not trigger PopeBot — skipping"
+              exit 0
+              ;;
+          esac
+
+          echo "Triggering $ROLE for $REPO#$ISSUE_NUMBER via label '$LABEL'"
+
+          # Build the prompt with full issue context
+          PROMPT="Work on issue #${ISSUE_NUMBER} in repository ${REPO}.
+
+          Issue URL: ${ISSUE_URL}
+
+          To get the full issue and comments, run:
+          gh issue view ${ISSUE_NUMBER} --repo ${REPO} --comments
+
+          Triggered by label: ${LABEL}"
+
+          # Send to PopeBot
+          HTTP_STATUS=$(curl -s -o /tmp/popebot_response.json -w "%{http_code}" \
+            -X POST "$WEBHOOK_URL" \
+            -H "x-api-key: $POPEBOT_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg prompt "$PROMPT" \
+              --arg repo "$REPO" \
+              --argjson issue_number "$ISSUE_NUMBER" \
+              --arg issue_url "$ISSUE_URL" \
+              --arg label "$LABEL" \
+              --arg role "$ROLE" \
+              '{
+                prompt: $prompt,
+                repo: $repo,
+                issue_number: $issue_number,
+                issue_url: $issue_url,
+                label: $label,
+                role: $role
+              }'
+            )")
+
+          echo "PopeBot responded with HTTP $HTTP_STATUS"
+          cat /tmp/popebot_response.json
+
+          if [ "$HTTP_STATUS" = "429" ]; then
+            echo "::warning::PopeBot $ROLE role is at max concurrency — agent not started"
+            exit 0
+          elif [ "$HTTP_STATUS" != "200" ]; then
+            echo "::error::PopeBot webhook failed with HTTP $HTTP_STATUS"
+            exit 1
+          fi
+
+          echo "Successfully triggered $ROLE agent for $REPO#$ISSUE_NUMBER"
